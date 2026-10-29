@@ -1,0 +1,95 @@
+{
+ "app.approvals": {
+  "file": "simulator/screens/app/approvals.html",
+  "area": "app",
+  "title": "Por aprobar",
+  "design": "draft",
+  "owner": "family",
+  "aliases": [],
+  "states": [
+   "default",
+   "empty",
+   "no-access"
+  ]
+ },
+ "app.chore-new": {
+  "file": "simulator/screens/app/chore-new.html",
+  "area": "app",
+  "title": "Nueva tarea",
+  "design": "draft",
+  "owner": "family",
+  "aliases": [],
+  "states": [
+   "default",
+   "safety",
+   "no-access"
+  ]
+ },
+ "app.chores": {
+  "file": "simulator/screens/app/chores.html",
+  "area": "app",
+  "title": "Tareas",
+  "design": "draft",
+  "owner": "family",
+  "aliases": [],
+  "states": [
+   "default",
+   "empty",
+   "no-access"
+  ]
+ },
+ "app.kid": {
+  "file": "simulator/screens/app/kid.html",
+  "area": "app",
+  "title": "El día del hijo",
+  "design": "draft",
+  "owner": "family",
+  "aliases": [],
+  "states": [
+   "default",
+   "waiting",
+   "all-done",
+   "missed",
+   "rest",
+   "not-found",
+   "no-access"
+  ]
+ },
+ "app.prizes": {
+  "file": "simulator/screens/app/prizes.html",
+  "area": "app",
+  "title": "Premios",
+  "design": "draft",
+  "owner": "family",
+  "aliases": [],
+  "states": [
+   "default",
+   "to-deliver",
+   "no-access"
+  ]
+ },
+ "app.today": {
+  "file": "simulator/screens/app/today.html",
+  "area": "app",
+  "title": "Hoy (papá)",
+  "design": "draft",
+  "owner": "family",
+  "aliases": [],
+  "states": [
+   "default",
+   "all-approved",
+   "no-access"
+  ]
+ },
+ "dev.missing": {
+  "file": "simulator/screens/missing.html",
+  "area": "dev",
+  "title": "Pantalla pendiente",
+  "design": "draft",
+  "owner": "shell",
+  "aliases": [],
+  "states": [
+   "default"
+  ]
+ }
+}

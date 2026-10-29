@@ -1,0 +1,11 @@
+{
+  "name": "cs-simulator",
+  "version": "0.0.0",
+  "private": true,
+  "description": "ChickenStreaks simulator: clickable screens with a fake family, to design screens and check flows.",
+  "scripts": {
+    "dev": "node simulator/tools/hot-serve.mjs",
+    "check": "cd simulator && node tools/build-screens.mjs --check && node tools/check-flows.mjs && node --test logic/family-core.test.cjs",
+    "test": "cd simulator/tests && npx playwright test"
+  }
+}

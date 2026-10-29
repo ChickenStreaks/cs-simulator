@@ -1,0 +1,206 @@
+{
+  "lane": "family",
+  "about": "The daily loop of the first version: chores, approvals, the kid's day, eggs, the streak and prizes.",
+  "screens": [
+    {
+      "id": "app.today",
+      "title": "Hoy (papá)",
+      "area": "app",
+      "design": "draft",
+      "file": "simulator/screens/app/today.html",
+      "flow": "simulator/flows/daily-loop.md",
+      "states": [
+        {
+          "id": "default",
+          "title": "Con tareas por aprobar"
+        },
+        {
+          "id": "all-approved",
+          "title": "Todo aprobado",
+          "drive": true
+        },
+        {
+          "id": "no-access",
+          "title": "Un hijo la abre",
+          "drive": true
+        }
+      ]
+    },
+    {
+      "id": "app.approvals",
+      "title": "Por aprobar",
+      "area": "app",
+      "design": "draft",
+      "file": "simulator/screens/app/approvals.html",
+      "flow": "simulator/flows/daily-loop.md",
+      "states": [
+        {
+          "id": "default",
+          "title": "Tareas esperando"
+        },
+        {
+          "id": "empty",
+          "title": "Bandeja vacía",
+          "drive": true
+        },
+        {
+          "id": "no-access",
+          "title": "Un hijo la abre",
+          "drive": true
+        }
+      ],
+      "undecided": [
+        {
+          "question": "¿«Repetir» pide un motivo, o basta con el toque?",
+          "ref": "simulator/DECISIONS.md#open"
+        }
+      ]
+    },
+    {
+      "id": "app.chores",
+      "title": "Tareas",
+      "area": "app",
+      "design": "draft",
+      "file": "simulator/screens/app/chores.html",
+      "flow": "simulator/flows/daily-loop.md",
+      "states": [
+        {
+          "id": "default",
+          "title": "Lista"
+        },
+        {
+          "id": "empty",
+          "title": "Sin tareas",
+          "drive": true
+        },
+        {
+          "id": "no-access",
+          "title": "Un hijo la abre",
+          "drive": true
+        }
+      ]
+    },
+    {
+      "id": "app.chore-new",
+      "title": "Nueva tarea",
+      "area": "app",
+      "design": "draft",
+      "file": "simulator/screens/app/chore-new.html",
+      "flow": "simulator/flows/daily-loop.md",
+      "states": [
+        {
+          "id": "default",
+          "title": "Vacía"
+        },
+        {
+          "id": "safety",
+          "title": "Aviso de seguridad (tareas R4)",
+          "drive": true
+        },
+        {
+          "id": "no-access",
+          "title": "Un hijo la abre",
+          "drive": true
+        }
+      ]
+    },
+    {
+      "id": "app.kid",
+      "title": "El día del hijo",
+      "area": "app",
+      "design": "draft",
+      "file": "simulator/screens/app/kid.html",
+      "flow": "simulator/flows/daily-loop.md",
+      "states": [
+        {
+          "id": "default",
+          "title": "Tareas por hacer",
+          "params": {
+            "kid": "p-emi"
+          }
+        },
+        {
+          "id": "waiting",
+          "title": "Esperando aprobación",
+          "drive": true,
+          "params": {
+            "kid": "p-sofia"
+          }
+        },
+        {
+          "id": "all-done",
+          "title": "Todo hecho",
+          "drive": true,
+          "params": {
+            "kid": "p-sofia"
+          }
+        },
+        {
+          "id": "missed",
+          "title": "Faltó un día (adulto)",
+          "drive": true,
+          "params": {
+            "kid": "p-sofia"
+          }
+        },
+        {
+          "id": "rest",
+          "title": "Día sin tareas",
+          "drive": true,
+          "params": {
+            "kid": "p-emi"
+          }
+        },
+        {
+          "id": "not-found",
+          "title": "No existe",
+          "drive": true,
+          "params": {
+            "kid": "p-nadie"
+          }
+        },
+        {
+          "id": "no-access",
+          "title": "Otro hijo",
+          "drive": true,
+          "params": {
+            "kid": "p-sofia"
+          }
+        }
+      ]
+    },
+    {
+      "id": "app.prizes",
+      "title": "Premios",
+      "area": "app",
+      "design": "draft",
+      "file": "simulator/screens/app/prizes.html",
+      "flow": "simulator/flows/prizes.md",
+      "states": [
+        {
+          "id": "default",
+          "title": "Para canjear",
+          "params": {
+            "kid": "p-sofia"
+          }
+        },
+        {
+          "id": "to-deliver",
+          "title": "Por entregar",
+          "drive": true,
+          "params": {
+            "kid": "p-sofia"
+          }
+        },
+        {
+          "id": "no-access",
+          "title": "Otro hijo",
+          "drive": true,
+          "params": {
+            "kid": "p-sofia"
+          }
+        }
+      ]
+    }
+  ]
+}

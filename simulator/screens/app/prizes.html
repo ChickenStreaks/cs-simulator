@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<script src="/simulator/sim.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Premios · ChickenStreaks</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/simulator/screens/tokens.css">
+<link rel="stylesheet" href="_app.css">
+</head>
+<body>
+<main class="app" data-od-id="prizes">
+  <header class="top">
+    <button type="button" class="back" data-od-id="prizes-back" aria-label="Regresar" hidden>←</button>
+    <div style="flex:1"><h1>Premios</h1><small data-od-id="prizes-sub"></small></div>
+    <span class="pill" data-od-id="prizes-eggs"><i class="egg"></i><b></b></span>
+  </header>
+  <p class="section" data-od-id="prizes-pending-title" hidden>Por entregar</p>
+  <div data-od-id="prizes-pending" style="display:flex;flex-direction:column;gap:8px"></div>
+  <p class="section">Para canjear</p>
+  <div data-od-id="prizes-list" style="display:flex;flex-direction:column;gap:8px"></div>
+</main>
+<div class="toast" data-od-id="prizes-toast" role="status" hidden></div>
+<nav class="tabs" data-od-id="tabs" aria-label="Secciones">
+  <button type="button" data-od-id="tab-kid" data-go="app.kid"><span aria-hidden="true">🐔</span>Hoy</button>
+  <button type="button" data-od-id="tab-prizes" data-go="app.prizes"><span aria-hidden="true">🎁</span>Premios</button>
+</nav>
+</body>
+</html>

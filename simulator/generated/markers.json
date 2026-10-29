@@ -1,0 +1,155 @@
+{
+ "settings": {
+  "daily-loop/wildcard-max": {
+   "flow": "simulator/flows/daily-loop.md",
+   "id": "wildcard-max",
+   "name": "Comodines guardados",
+   "default": "2",
+   "limits": "0–5",
+   "by": "server config",
+   "rule": "rachas R5"
+  },
+  "daily-loop/wildcard-every": {
+   "flow": "simulator/flows/daily-loop.md",
+   "id": "wildcard-every",
+   "name": "Días de racha por comodín",
+   "default": "7",
+   "limits": "1–30",
+   "by": "server config",
+   "rule": "rachas R5"
+  },
+  "daily-loop/milestones": {
+   "flow": "simulator/flows/daily-loop.md",
+   "id": "milestones",
+   "name": "Hitos de racha",
+   "default": "7, 14, 30",
+   "limits": "—",
+   "by": "server config",
+   "rule": "rachas R11"
+  },
+  "daily-loop/milestone-eggs": {
+   "flow": "simulator/flows/daily-loop.md",
+   "id": "milestone-eggs",
+   "name": "Huevos por hito",
+   "default": "10",
+   "limits": "1–100",
+   "by": "server config",
+   "rule": "rachas R11"
+  },
+  "daily-loop/auto-approve-hours": {
+   "flow": "simulator/flows/daily-loop.md",
+   "id": "auto-approve-hours",
+   "name": "Aprobación automática",
+   "default": "24 h",
+   "limits": "1–72 h",
+   "by": "server config",
+   "rule": "tareas R10"
+  },
+  "daily-loop/hen-stages": {
+   "flow": "simulator/flows/daily-loop.md",
+   "id": "hen-stages",
+   "name": "Etapas de la gallina",
+   "default": "10, 50, 150",
+   "limits": "—",
+   "by": "server config",
+   "rule": "gallina R2"
+  }
+ },
+ "configurable": [],
+ "undecided": [
+  {
+   "question": "¿«Repetir» pide un motivo, o basta con el toque?",
+   "ref": "simulator/DECISIONS.md#open",
+   "screen": "app.approvals",
+   "file": "simulator/catalog/family.json"
+  }
+ ],
+ "provisional": [],
+ "decisions": [
+  {
+   "id": "F1",
+   "decision": "A streak milestone (7, 14, 30 days) is worth 10 eggs",
+   "why": "rachas R11 gives no number",
+   "where": "world.settings.milestoneEggs, flows/daily-loop.md"
+  },
+  {
+   "id": "F2",
+   "decision": "A milestone pays each time a streak run reaches it, not once ever",
+   "why": "«bonificación única» reads both ways",
+   "where": "logic/family-core.js streak()"
+  },
+  {
+   "id": "F3",
+   "decision": "A kid starts with no wildcard",
+   "why": "rachas R5 says how they are earned, not the start",
+   "where": "logic/family-core.js streak()"
+  },
+  {
+   "id": "F4",
+   "decision": "The hen sleeps after 3 days with no marks",
+   "why": "gallina R5 says «en un tiempo»",
+   "where": "logic/family.js app.kid"
+  },
+  {
+   "id": "F5",
+   "decision": "The screens use draft tokens copied from the visual brief",
+   "why": "blueprint/design/tokens/ is still empty",
+   "where": "screens/tokens.css"
+  }
+ ],
+ "openQuestions": [
+  {
+   "flow": "simulator/flows/daily-loop.md",
+   "text": "Does «Repetir» ask the adult for a reason, or is the tap enough?"
+  },
+  {
+   "flow": "simulator/flows/prizes.md",
+   "text": "Can a kid cancel a redemption before it is delivered?"
+  }
+ ],
+ "drafts": [
+  {
+   "screen": "app.today",
+   "title": "Hoy (papá)",
+   "owner": "family"
+  },
+  {
+   "screen": "app.approvals",
+   "title": "Por aprobar",
+   "owner": "family"
+  },
+  {
+   "screen": "app.chores",
+   "title": "Tareas",
+   "owner": "family"
+  },
+  {
+   "screen": "app.chore-new",
+   "title": "Nueva tarea",
+   "owner": "family"
+  },
+  {
+   "screen": "app.kid",
+   "title": "El día del hijo",
+   "owner": "family"
+  },
+  {
+   "screen": "app.prizes",
+   "title": "Premios",
+   "owner": "family"
+  },
+  {
+   "screen": "dev.missing",
+   "title": "Pantalla pendiente",
+   "owner": "shell"
+  }
+ ],
+ "unmarked": [
+  "daily-loop/wildcard-max",
+  "daily-loop/wildcard-every",
+  "daily-loop/milestones",
+  "daily-loop/milestone-eggs",
+  "daily-loop/auto-approve-hours",
+  "daily-loop/hen-stages"
+ ]
+}

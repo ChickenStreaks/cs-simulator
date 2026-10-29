@@ -1,0 +1,68 @@
+/* The look every app screen shares (draft, from docs/design/referencia-visual.html «Fogata refinada · Marfil»).
+   Tokens: ../tokens.css. A designer's screen replaces this; the logic finds elements by data-od-id, never by class. */
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body { background: var(--cs-bg); color: var(--cs-text); font: 400 15px/1.45 var(--cs-font-text); -webkit-font-smoothing: antialiased; }
+h1, h2, h3, .display { font-family: var(--cs-font-display); letter-spacing: -.01em; margin: 0; }
+button { font: inherit; color: inherit; }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid var(--cs-wait); outline-offset: 2px; }
+[hidden] { display: none !important; }
+
+.app { min-height: 100vh; display: flex; flex-direction: column; padding: 56px 16px 96px; gap: 14px; }
+.top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.top h1 { font-size: 26px; font-weight: 700; }
+.top small { display: block; font: 500 13px var(--cs-font-text); color: var(--cs-text-soft); }
+.back { width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--cs-card-2); display: grid; place-items: center; cursor: pointer; font-size: 18px; }
+.section { font: 700 12px var(--cs-font-text); text-transform: uppercase; letter-spacing: .08em; color: var(--cs-text-soft); margin: 6px 0 -4px; }
+
+.pill { display: inline-flex; align-items: center; gap: 6px; background: var(--cs-card); border: 1px solid var(--cs-line); border-radius: var(--cs-radius-pill); padding: 5px 12px 5px 8px; font: 700 17px var(--cs-font-display); }
+.egg { width: 16px; height: 20px; display: inline-block; flex: none; background: var(--cs-egg); border-radius: 50% 50% 46% 46% / 58% 58% 42% 42%; box-shadow: inset -3px -3px 0 rgba(0,0,0,.12), inset 3px 3px 0 rgba(255,255,255,.35); }
+.egg.sm { width: 11px; height: 14px; }
+.reward { display: inline-flex; align-items: center; gap: 4px; font: 700 14px var(--cs-font-display); color: var(--cs-egg-text); }
+
+.card { background: var(--cs-card); border-radius: var(--cs-radius-card); padding: 14px; box-shadow: var(--cs-shadow); }
+.hero { display: grid; grid-template-columns: 96px 1fr; gap: 12px; align-items: center; position: relative; overflow: hidden; }
+.hero::before { content: ""; position: absolute; left: -40px; top: -40px; width: 200px; height: 200px; background: radial-gradient(circle, color-mix(in srgb, var(--cs-streak) 22%, transparent), transparent 70%); pointer-events: none; }
+.hen { width: 96px; height: 96px; image-rendering: pixelated; position: relative; display: grid; place-items: center; font-size: 64px; }
+.hen img { width: 96px; image-rendering: pixelated; }
+.hen[data-stage=dorada] img { filter: sepia(1) saturate(4) hue-rotate(-12deg) brightness(1.08); }
+.hen[data-mood=sleep] img { filter: grayscale(.5) brightness(.8); }
+.big { font: 800 38px/1 var(--cs-font-display); }
+.big span { font-size: 16px; font-weight: 600; color: var(--cs-text-soft); }
+.soft { color: var(--cs-text-soft); font-weight: 600; font-size: 12px; }
+.week { display: flex; gap: 5px; margin: 10px 0 6px; }
+.week i { flex: 1; height: 7px; border-radius: 999px; background: var(--cs-card-2); }
+.week i[data-s=done], .week i[data-s=forgiven] { background: var(--cs-streak); }
+.week i[data-s=saved] { background: repeating-linear-gradient(45deg, var(--cs-streak) 0 3px, transparent 3px 6px); }
+.week i[data-s=paused] { background: var(--cs-line); }
+
+.row { background: var(--cs-card); border-radius: 18px; padding: 12px; display: grid; grid-template-columns: 42px 1fr auto; gap: 10px; align-items: center; box-shadow: var(--cs-shadow); }
+.icon { width: 42px; height: 42px; border-radius: 14px; background: var(--cs-card-2); display: grid; place-items: center; font-size: 21px; }
+.row h4 { margin: 0 0 4px; font-size: 15px; font-weight: 700; }
+.row .meta { display: flex; gap: 6px; align-items: center; font-size: 12px; font-weight: 600; flex-wrap: wrap; color: var(--cs-text-soft); }
+.row .extra { grid-column: 2 / 4; display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; padding: 2px 8px; font-size: 11px; font-weight: 700; }
+.chip.wait { color: var(--cs-wait); background: color-mix(in srgb, var(--cs-wait) 14%, transparent); }
+.chip.ok { color: var(--cs-ok); background: color-mix(in srgb, var(--cs-ok) 14%, transparent); }
+.chip.redo { color: var(--cs-redo); background: color-mix(in srgb, var(--cs-redo) 14%, transparent); }
+.done { width: 38px; height: 38px; border-radius: 50%; background: var(--cs-ok); color: var(--cs-card); display: grid; place-items: center; font-size: 19px; font-weight: 800; }
+
+.btn { font: 700 14px var(--cs-font-text); border: 0; border-radius: var(--cs-radius-pill); padding: 10px 16px; min-height: 40px; background: var(--cs-action-bg); color: var(--cs-action-text); cursor: pointer; }
+.btn.soft { background: var(--cs-card-2); color: var(--cs-text); }
+.btn.wide { width: 100%; min-height: 52px; font-size: 16px; }
+.btn:disabled { opacity: .45; cursor: default; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chips button { font: 600 12px var(--cs-font-text); border: 1px solid var(--cs-line); background: transparent; border-radius: 999px; padding: 6px 10px; cursor: pointer; }
+.chips button[aria-pressed=true] { background: var(--cs-action-bg); color: var(--cs-action-text); border-color: transparent; }
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label, .field .label { font-weight: 700; font-size: 13px; }
+.field input[type=text], .field input[type=number] { font: 500 16px var(--cs-font-text); color: var(--cs-text); background: var(--cs-card); border: 1px solid var(--cs-line); border-radius: 14px; padding: 12px 14px; }
+.note { background: color-mix(in srgb, var(--cs-egg) 14%, var(--cs-card)); border-radius: 14px; padding: 10px 12px; font-size: 13px; }
+.toast { position: fixed; left: 16px; right: 16px; bottom: 96px; background: var(--cs-action-bg); color: var(--cs-action-text); border-radius: 14px; padding: 12px 14px; font-weight: 700; text-align: center; }
+
+.tabs { position: fixed; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-around; padding: 8px 8px 24px; background: var(--cs-card); border-top: 1px solid var(--cs-line); }
+.tabs button { border: 0; background: none; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; font-weight: 700; color: var(--cs-text-soft); cursor: pointer; padding: 4px 12px; position: relative; }
+.tabs button span { font-size: 22px; }
+.tabs button[aria-current=page] { color: var(--cs-text); }
+.tabs .badge { position: absolute; top: 0; right: 6px; min-width: 18px; height: 18px; border-radius: 9px; background: var(--cs-streak); color: #141826; font-size: 11px; display: grid; place-items: center; padding: 0 4px; }

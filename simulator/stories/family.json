@@ -1,0 +1,217 @@
+{
+  "lane": "family",
+  "stories": [
+    {
+      "id": "family-approve-day",
+      "title": "Aprobar el día",
+      "line": "Eres Mamá: apruebas lo que hicieron tus hijos.",
+      "minutes": 2,
+      "scenario": "shell-base",
+      "viewAs": {
+        "person": "p-mama"
+      },
+      "session": {
+        "signedIn": true
+      },
+      "start": {
+        "screen": "app.today"
+      },
+      "steps": [
+        {
+          "screen": "app.today",
+          "state": "default",
+          "kind": "read",
+          "target": "today-kids",
+          "text": "Así empieza tu día: cada hijo con su avance.",
+          "sub": "La racha y los huevos se ven de un vistazo."
+        },
+        {
+          "screen": "app.today",
+          "state": "default",
+          "kind": "tap",
+          "target": "today-pending",
+          "text": "Toca «Aprobar 2 tareas»."
+        },
+        {
+          "screen": "app.approvals",
+          "state": "default",
+          "kind": "tap",
+          "target": "approval-praise-mk-sofia-cama-hoy-1",
+          "text": "Elige un elogio para Sofía.",
+          "sub": "Describe lo que hizo, no cómo es."
+        },
+        {
+          "screen": "app.approvals",
+          "state": "default",
+          "kind": "tap",
+          "target": "approval-ok-mk-sofia-cama-hoy",
+          "text": "Ahora toca «Aprobar».",
+          "sub": "Sus huevos llegan al aprobar."
+        },
+        {
+          "screen": "app.approvals",
+          "state": [
+            "default",
+            "empty"
+          ],
+          "kind": "read",
+          "target": "approvals-done",
+          "text": "Queda firmada por ti: «Aprobada por Mamá»."
+        }
+      ]
+    },
+    {
+      "id": "family-kid-marks",
+      "title": "El día de Sofía",
+      "line": "Eres Sofía, en tu teléfono: marcas una tarea y ves tus premios.",
+      "minutes": 2,
+      "scenario": "shell-base",
+      "viewAs": {
+        "person": "p-sofia"
+      },
+      "session": {
+        "signedIn": true
+      },
+      "start": {
+        "screen": "app.kid"
+      },
+      "steps": [
+        {
+          "screen": "app.kid",
+          "state": [
+            "default",
+            "waiting"
+          ],
+          "kind": "read",
+          "target": "kid-hero",
+          "text": "Tu gallina y tu semana.",
+          "sub": "A los 8 años lo principal es la semana."
+        },
+        {
+          "screen": "app.kid",
+          "state": [
+            "default",
+            "waiting"
+          ],
+          "kind": "tap",
+          "target": "kid-mark-ch-sofia-juguetes",
+          "text": "Toca «¡Lo hice!» en «Recoger sus juguetes»."
+        },
+        {
+          "screen": "app.kid",
+          "state": [
+            "waiting",
+            "all-done"
+          ],
+          "kind": "read",
+          "target": "kid-chore-ch-sofia-juguetes",
+          "text": "Queda en espera hasta que un adulto la apruebe.",
+          "sub": "El día ya cuenta para tu racha."
+        },
+        {
+          "screen": "app.kid",
+          "state": [
+            "waiting",
+            "all-done"
+          ],
+          "kind": "tap",
+          "target": "tab-prizes",
+          "text": "Toca «Premios»."
+        },
+        {
+          "screen": "app.prizes",
+          "state": "*",
+          "kind": "read",
+          "target": "prizes-list",
+          "text": "Cada premio dice cuántos días de tareas cuesta."
+        }
+      ]
+    },
+    {
+      "id": "family-new-chore",
+      "title": "Crear una tarea",
+      "line": "Eres Papá: le das a Mateo una tarea nueva.",
+      "minutes": 2,
+      "scenario": "shell-base",
+      "viewAs": {
+        "person": "p-papa"
+      },
+      "session": {
+        "signedIn": true
+      },
+      "start": {
+        "screen": "app.chores"
+      },
+      "steps": [
+        {
+          "screen": "app.chores",
+          "state": "default",
+          "kind": "tap",
+          "target": "chores-new",
+          "text": "Toca «Nueva tarea»."
+        },
+        {
+          "screen": "app.chore-new",
+          "state": "*",
+          "kind": "tap",
+          "target": "chore-new-kid-p-mateo",
+          "text": "Elige a Mateo.",
+          "sub": "Las sugerencias cambian con su edad."
+        },
+        {
+          "screen": "app.chore-new",
+          "state": "*",
+          "kind": "tap",
+          "target": "chore-new-suggest-2",
+          "text": "Toca la sugerencia «Doblar su ropa»."
+        },
+        {
+          "screen": "app.chore-new",
+          "state": "*",
+          "kind": "tap",
+          "target": "chore-new-save",
+          "text": "Toca «Guardar tarea»."
+        },
+        {
+          "screen": "app.chores",
+          "state": "default",
+          "kind": "read",
+          "target": "chores-list",
+          "text": "Listo: Mateo la ve desde hoy en su día."
+        }
+      ]
+    },
+    {
+      "id": "family-mission-forgive",
+      "title": "Perdona el día de Sofía",
+      "line": "Eres Mamá. Sofía no marcó sus tareas ayer. Sin guía.",
+      "coach": false,
+      "scenario": "family-missed",
+      "viewAs": {
+        "person": "p-mama"
+      },
+      "session": {
+        "signedIn": true
+      },
+      "start": {
+        "screen": "app.today"
+      },
+      "goal": {
+        "record": {
+          "col": "forgives",
+          "match": {
+            "kid": "p-sofia"
+          }
+        }
+      },
+      "question": {
+        "text": "¿Qué tan fácil fue encontrar cómo perdonar?",
+        "options": [
+          "Fácil",
+          "Regular",
+          "Difícil"
+        ]
+      }
+    }
+  ]
+}

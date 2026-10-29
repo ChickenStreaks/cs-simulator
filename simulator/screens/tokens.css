@@ -1,0 +1,45 @@
+/* ChickenStreaks — the simulator's draft tokens: «Fogata refinada» (docs/design/brief-sistema-visual.md, chosen
+   2026-10-26). Dark is the main mode; light is «día nublado». sim.js sets <html data-theme>.
+   ponytail: a draft copy of the brief's table; when blueprint/design/tokens lands, screens link that instead. */
+:root, [data-theme=dark] {
+  --cs-bg: #141826;
+  --cs-card: #1F2437;
+  --cs-card-2: #2A3048;
+  --cs-line: #2E3550;
+  --cs-text: #F5EEDF;
+  --cs-text-soft: #B9B3C9;
+  --cs-action-bg: #F5EEDF;
+  --cs-action-text: #141826;
+  --cs-egg: #FFD36E;
+  --cs-egg-text: #FFD36E;
+  --cs-streak: #F2B13C;
+  --cs-ok: #8FD0A0;
+  --cs-wait: #8EC1F2;
+  --cs-redo: #C9B4F5;
+  --cs-shadow: 0 1px 0 rgba(255, 255, 255, .03), 0 8px 24px rgba(0, 0, 0, .28);
+  color-scheme: dark;
+}
+[data-theme=light] {
+  --cs-bg: #EEF0F6;
+  --cs-card: #FFFFFF;
+  --cs-card-2: #E6E9F2;
+  --cs-line: #DCE0EC;
+  --cs-text: #1A1F33;
+  --cs-text-soft: #4F5670;
+  --cs-action-bg: #2A3048;
+  --cs-action-text: #FFFFFF;
+  --cs-egg: #E8A92B;
+  --cs-egg-text: #8A5A06;
+  --cs-streak: #D9921F;
+  --cs-ok: #2E7A48;
+  --cs-wait: #2A5F95;
+  --cs-redo: #6A4BB0;
+  --cs-shadow: 0 1px 2px rgba(26, 31, 51, .06), 0 8px 24px rgba(26, 31, 51, .08);
+  color-scheme: light;
+}
+:root {
+  --cs-font-display: Outfit, system-ui, sans-serif;
+  --cs-font-text: "Plus Jakarta Sans", system-ui, sans-serif;
+  --cs-radius-card: 20px;
+  --cs-radius-pill: 999px;
+}

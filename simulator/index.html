@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simulador · ChickenStreaks</title>
+<meta name="description" content="Simulación de ChickenStreaks: una familia de prueba.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/simulator/screens/tokens.css">
+<link rel="stylesheet" href="/simulator/shell/shell.css">
+<!-- the shell is a WB host: one state for the whole visit, shared with the screen in the iframe -->
+<script src="/simulator/sim.js"></script>
+</head>
+<body>
+<header class="sh-bar" id="sh-bar" role="region" aria-label="Simulador" data-testid="sh-bar"></header>
+
+<main class="sh-stage" id="sh-stage">
+  <div class="sh-caption" id="sh-caption" data-testid="sh-caption"></div>
+  <div class="sh-device phone" id="sh-device" data-testid="sh-device">
+    <div class="sh-chrome" id="sh-chrome" hidden aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="sh-screen" id="sh-screen">
+      <iframe id="sh-frame" title="Pantalla de la app" data-testid="sh-frame"></iframe>
+    </div>
+  </div>
+</main>
+
+<!-- over the screen: comment pick and pins, marker tags, the coach's ring -->
+<div class="sh-over" id="sh-over" data-testid="sh-over"></div>
+<!-- one polite live line for the coach and the toasts -->
+<p class="sh-sr" id="sh-live" aria-live="polite"></p>
+
+<script src="/simulator/shell/shell.js"></script>
+<script src="/simulator/shell/comments.js"></script>
+</body>
+</html>

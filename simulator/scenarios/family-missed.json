@@ -1,0 +1,55 @@
+{
+  "id": "family-missed",
+  "title": "Sofía faltó ayer",
+  "line": "No marcó sus tareas de ayer; un adulto puede perdonar el día.",
+  "extends": "shell-base",
+  "viewAs": {
+    "person": "p-mama"
+  },
+  "session": {
+    "signedIn": true
+  },
+  "data": {
+    "marks": [
+      {
+        "id": "mk-sofia-cama-1",
+        "_delete": true
+      },
+      {
+        "id": "mk-sofia-juguetes-1",
+        "_delete": true
+      }
+    ]
+  },
+  "situations": [
+    {
+      "id": "family-missed-forgive",
+      "group": "La racha",
+      "title": "Sofía faltó ayer",
+      "line": "Mamá puede perdonar el día (rachas R7).",
+      "patch": [],
+      "open": {
+        "screen": "app.kid",
+        "params": {
+          "kid": "p-sofia"
+        }
+      },
+      "viewAs": {
+        "person": "p-mama"
+      }
+    },
+    {
+      "id": "family-missed-kid",
+      "group": "La racha",
+      "title": "Sofía ve su racha rota",
+      "line": "Empieza de nuevo, sin rojo (rachas R10).",
+      "patch": [],
+      "open": {
+        "screen": "app.kid"
+      },
+      "viewAs": {
+        "person": "p-sofia"
+      }
+    }
+  ]
+}

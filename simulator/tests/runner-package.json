@@ -1,0 +1,6 @@
+{
+  "name": "chickenstreaks-simulator-tests",
+  "private": true,
+  "description": "Playwright runner for the ChickenStreaks simulator. Installed outside the repo by simulator/tools/setup-tests.sh; simulator/tests/node_modules links to it.",
+  "devDependencies": { "@playwright/test": "1.64.1", "html-to-image": "1.11.13" }
+}

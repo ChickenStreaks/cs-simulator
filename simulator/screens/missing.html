@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<script src="/simulator/sim.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="wb-screen" content="dev.missing">
+<title>Pantalla pendiente · ChickenStreaks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/simulator/screens/tokens.css">
+<style>
+  html,body{margin:0;height:100%}
+  body{background:var(--cs-bg);color:var(--cs-text);font-family:"Plus Jakarta Sans",system-ui,sans-serif}
+  main{min-height:100%;display:flex}
+</style>
+</head>
+<body>
+<main data-od-id="missing-screen"></main>
+<script>
+  // a screen the catalog does not have yet: the shared full-screen state (WB.ui.stateScreen, CONTRACT §6), kind «no existe»
+  WB.ready(function () {
+    var id = WB.params.id || '', s = WB.screens()[id];
+    WB.ui.stateScreen(document.querySelector('main'), {
+      kind: 'not-found', id: 'missing', title: 'Esta pantalla aún no existe',
+      text: (s ? '«' + s.title + '» la' : 'La') + ' diseña el equipo. Comenta qué esperabas ver.',
+      primary: { label: 'Regresar', onClick: function () { WB.back(); } }
+    });
+    WB.setScreenState('default');
+  });
+</script>
+</body>
+</html>

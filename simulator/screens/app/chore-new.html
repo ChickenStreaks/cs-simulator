@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<script src="/simulator/sim.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nueva tarea · ChickenStreaks</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/simulator/screens/tokens.css">
+<link rel="stylesheet" href="_app.css">
+</head>
+<body>
+<main class="app" data-od-id="chore-new" style="padding-bottom:32px">
+  <header class="top">
+    <button type="button" class="back" data-od-id="chore-new-back" aria-label="Regresar">←</button>
+    <h1 style="flex:1">Nueva tarea</h1>
+  </header>
+  <div class="field">
+    <span class="label">¿Para quién?</span>
+    <div class="chips" data-od-id="chore-new-kids" role="group" aria-label="Para quién"></div>
+  </div>
+  <div class="field">
+    <span class="label">Sugeridas para su edad</span>
+    <div class="chips" data-od-id="chore-new-suggested"></div>
+  </div>
+  <div class="field">
+    <label for="chore-name">Nombre</label>
+    <input type="text" id="chore-name" data-od-id="chore-new-name" placeholder="Tender su cama" maxlength="40" autocomplete="off">
+  </div>
+  <p class="note" data-od-id="chore-new-safety" role="note" hidden>¿Es seguro para su edad? Considera acompañarlo.</p>
+  <div class="field">
+    <span class="label">¿Qué días?</span>
+    <div class="chips" data-od-id="chore-new-days" role="group" aria-label="Días"></div>
+  </div>
+  <div class="field">
+    <label for="chore-eggs">Huevos que vale</label>
+    <input type="number" id="chore-eggs" data-od-id="chore-new-eggs" min="1" max="50" step="1" inputmode="numeric">
+  </div>
+  <div class="field">
+    <span class="label">Aprobación</span>
+    <div class="chips"><button type="button" data-od-id="chore-new-auto" aria-pressed="false">Se aprueba sola</button></div>
+  </div>
+  <button type="button" class="btn wide" data-od-id="chore-new-save">Guardar tarea</button>
+</main>
+</body>
+</html>

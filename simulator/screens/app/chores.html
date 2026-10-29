@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<script src="/simulator/sim.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tareas · ChickenStreaks</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/simulator/screens/tokens.css">
+<link rel="stylesheet" href="_app.css">
+</head>
+<body>
+<main class="app" data-od-id="chores">
+  <header class="top">
+    <div><h1>Tareas</h1><small data-od-id="chores-count"></small></div>
+    <button type="button" class="btn" data-od-id="chores-new">Nueva tarea</button>
+  </header>
+  <div data-od-id="chores-list" style="display:flex;flex-direction:column;gap:10px"></div>
+</main>
+<nav class="tabs" data-od-id="tabs" aria-label="Secciones">
+  <button type="button" data-od-id="tab-today" data-go="app.today"><span aria-hidden="true">🏠</span>Hoy</button>
+  <button type="button" data-od-id="tab-approvals" data-go="app.approvals"><span aria-hidden="true">✅</span>Aprobar<i class="badge" data-od-id="tab-approvals-count" hidden></i></button>
+  <button type="button" data-od-id="tab-chores" data-go="app.chores"><span aria-hidden="true">📋</span>Tareas</button>
+</nav>
+</body>
+</html>

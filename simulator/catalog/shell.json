@@ -1,0 +1,19 @@
+{
+  "lane": "shell",
+  "about": "The shell's own pages.",
+  "screens": [
+    {
+      "id": "dev.missing",
+      "title": "Pantalla pendiente",
+      "area": "dev",
+      "design": "draft",
+      "file": "simulator/screens/missing.html",
+      "states": [
+        {
+          "id": "default",
+          "title": "Aún no existe"
+        }
+      ]
+    }
+  ]
+}
