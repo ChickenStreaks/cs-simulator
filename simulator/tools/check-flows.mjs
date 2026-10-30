@@ -4,7 +4,7 @@
 //   structure — every catalog screen id is named in at least one flow doc (dev.* excepted); every screen id a flow names
 //               exists in the catalog; every flow has its header: id, actor, trigger, status and «last checked
 //               against the simulator: <commit>» (also read as last_checked).
-//   sync      — against a base (default dev): every file changed under screens/, logic/, scenarios/ or stories/ maps
+//   sync      — against a base (default dev): every file changed under screens/, logic/ or scenarios/ maps
 //               to the flows that name its screen ids, and at least one of those flow docs changed too; a flow doc that
 //               changed names a new commit in that line. Changes not committed yet count.
 //
@@ -25,9 +25,9 @@ import { fileURLToPath } from 'node:url';
 const HEADER = ['id', 'actor', 'trigger', 'status', 'last_checked'];
 const LAST = 'last checked against the simulator';   // how a flow header names it (Wirebit's words, kept); last_checked also reads
 const LAST_RE = /^(last checked against the simulator|last_checked):.*$/im;
-const WATCHED = ['screens/', 'logic/', 'scenarios/', 'stories/'];
+const WATCHED = ['screens/', 'logic/', 'scenarios/'];
 const MARKER = /^Flows unchanged:\s*\S.{4,}$/m;   // the commit message line an --allow reason becomes
-const ID = /\b(?:app|dev)\.[a-z0-9-]+(?:\.[a-z0-9-]+)*/g;
+const ID = /\b(?:app|dev)\.(?!html\b)[a-z0-9-]+(?:\.[a-z0-9-]+)*/g;   // a page's file name (app.html) is not a screen id
 const WIRE = /(?:WB\.wire|stepsScreen)\(\s*['"]((?:app|dev)\.[a-z0-9.-]+)['"]/g;
 
 function args(argv) {
@@ -137,7 +137,7 @@ function idsOf(root, file, screens, mb) {
     const parts = file.split('/'), key = parts.find((p) => p.startsWith('_')) || path.basename(file);
     return all.filter((s) => s.file && fs.existsSync(path.join(root, s.file)) && fs.readFileSync(path.join(root, s.file), 'utf8').includes(key)).map((s) => s.id);
   }
-  // logic: the screen each changed hunk sits in (its WB.wire), else the ids its lines name; scenarios, stories: the ids
+  // logic: the screen each changed hunk sits in (its WB.wire), else the ids its lines name; scenarios: the ids
   // in the changed lines
   const ids = new Set(), abs = path.join(root, file), now = fs.existsSync(abs) ? fs.readFileSync(abs, 'utf8').split('\n') : [];
   let inWire = false;

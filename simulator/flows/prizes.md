@@ -3,7 +3,8 @@ id: prizes
 actor: kid redeems, adult delivers
 trigger: a kid has enough eggs for a prize
 status: draft
-last checked against the simulator: 2e001cb
+order: 3
+last checked against the simulator: 03f6c59
 ---
 
 # Prizes — redeem and deliver

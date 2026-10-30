@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<script src="/simulator/sim.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bienvenida · ChickenStreaks</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/simulator/screens/tokens.css">
+<link rel="stylesheet" href="_app.css">
+<style>
+  html,body{height:100%}
+  .ob{height:100%;display:flex;flex-direction:column;padding:24px 0 28px;box-sizing:border-box}
+  .dots{display:flex;gap:6px;justify-content:flex-end;padding:0 24px}
+  .dots i{width:8px;height:8px;border-radius:4px;background:var(--cs-line)}
+  .dots i.on{width:18px;background:var(--cs-action-bg)}
+  .pager{flex:1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+  .pager::-webkit-scrollbar{display:none}
+  .slide{flex:0 0 100%;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 32px;box-sizing:border-box;text-align:center}
+  .pic{width:200px;height:200px;border-radius:40px;background:var(--cs-card);display:flex;align-items:center;justify-content:center;font-size:96px;margin-bottom:32px}
+  .pic img{width:140px}
+  .slide h2{font-family:Outfit,sans-serif;font-size:32px;margin:0 0 10px}
+  .slide p{color:var(--cs-text-soft);font-size:17px;line-height:1.4;margin:0;max-width:300px}
+  .dock{padding:0 24px;display:flex;flex-direction:column;gap:12px}
+  .dock .btn{height:56px;font-size:17px}
+  .link{background:none;border:0;color:var(--cs-text-soft);font:inherit;padding:10px}
+  .link b{color:var(--cs-text)}
+</style>
+</head>
+<body>
+<main class="ob" data-od-id="onboarding">
+  <div class="dots" data-od-id="onboarding-steps" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></div>
+  <div class="pager" data-od-id="onboarding-pager" aria-label="Bienvenida, 4 pasos">
+    <section class="slide" data-od-id="onboarding-slide-1"><div class="pic"><img src="../img/gallina.png" alt=""></div><h2>ChickenStreaks</h2><p>Buenos hábitos, en familia.</p></section>
+    <section class="slide" data-od-id="onboarding-slide-2"><div class="pic" aria-hidden="true">✅</div><h2>Tareas</h2><p>Tus hijos marcan lo que hicieron y tú lo apruebas.</p></section>
+    <section class="slide" data-od-id="onboarding-slide-3"><div class="pic" aria-hidden="true">🥚</div><h2>Su gallina</h2><p>Cada tarea le da huevos para cambiarlos por premios que tú eliges.</p></section>
+    <section class="slide" data-od-id="onboarding-slide-4"><div class="pic" aria-hidden="true">🔥</div><h2>Rachas sin presión</h2><p>Con comodines y perdón. Nunca rankings entre hermanos.</p></section>
+  </div>
+  <div class="dock">
+    <button type="button" class="btn" data-od-id="onboarding-cta">Comenzar</button>
+    <button type="button" class="link" data-od-id="onboarding-sign-in">¿Ya tienes cuenta? <b>Inicia sesión</b></button>
+  </div>
+</main>
+</body>
+</html>

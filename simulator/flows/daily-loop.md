@@ -3,7 +3,8 @@ id: daily-loop
 actor: adult (Papá, Mamá) and kid
 trigger: a new day with chores
 status: draft
-last checked against the simulator: 2e001cb
+order: 2
+last checked against the simulator: 03f6c59
 ---
 
 # The daily loop — assign, mark, approve
@@ -34,7 +35,7 @@ and the hen grows. Screens: `app.today`, `app.approvals`, `app.chores`, `app.cho
 6. **Repeat, not reject** — «Repetir» (tareas R12): the kid sees «↻ Repítela» and «¡Ya quedó!», no eggs lost, no
    punishment; the day is open again until it is marked.
 7. **Nobody approved** — a mark pending 24 hours approves itself when the clock passes it: «Se aprobó sola» (tareas
-   R10). «¿Qué pasa si…?» → «Nadie aprobó en un día».
+   R10). From the console: a mark pending 23 hours, then `WB.clock.advance('1h')` (tests/family.spec.mjs).
 8. **The streak and the hen** — `app.kid`: the age decides what leads (rachas R12): 4–6 no number («¡Tu gallina está
    contenta!»), 7–9 the week («5 de 7 días») with the streak second, 10+ the streak number with wildcards and the best.
    A wildcard is earned every 7 days, at most 2, and saves a missed day by itself (rachas R5; the week bar shows it

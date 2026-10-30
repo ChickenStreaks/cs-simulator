@@ -1,37 +1,45 @@
 <!doctype html>
-<html lang="es-MX">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Simulador · ChickenStreaks</title>
-<meta name="description" content="Simulación de ChickenStreaks: una familia de prueba.">
+<title>ChickenStreaks Simulator</title>
+<meta name="description" content="ChickenStreaks with a test family: use the app, or see every screen.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/simulator/screens/tokens.css">
 <link rel="stylesheet" href="/simulator/shell/shell.css">
-<!-- the shell is a WB host: one state for the whole visit, shared with the screen in the iframe -->
+<link rel="stylesheet" href="/simulator/shell/pages.css">
+<!-- the doors read the one WB state: is there a family in use, signed in? -->
 <script src="/simulator/sim.js"></script>
 </head>
-<body>
-<header class="sh-bar" id="sh-bar" role="region" aria-label="Simulador" data-testid="sh-bar"></header>
+<body class="sh-page">
+<header class="sh-bar" role="region" aria-label="Simulator">
+  <a class="sh-brand" href="/simulator/"><img class="sh-hen" src="/simulator/screens/img/gallina.png" alt=""><span class="sh-brand-t"><b>ChickenStreaks</b> Simulator</span></a>
+</header>
 
-<main class="sh-stage" id="sh-stage">
-  <div class="sh-caption" id="sh-caption" data-testid="sh-caption"></div>
-  <div class="sh-device phone" id="sh-device" data-testid="sh-device">
-    <div class="sh-chrome" id="sh-chrome" hidden aria-hidden="true"><i></i><i></i><i></i></div>
-    <div class="sh-screen" id="sh-screen">
-      <iframe id="sh-frame" title="Pantalla de la app" data-testid="sh-frame"></iframe>
-    </div>
+<main class="doors">
+  <h1>Try the app, or see every screen</h1>
+  <div class="doors-row">
+    <section class="door" data-testid="door-app" aria-labelledby="door-app-t">
+      <h2 id="door-app-t">Use the app</h2>
+      <p>A phone with the test family. It remembers what you do until Reset.</p>
+      <div class="door-acts">
+        <a class="door-btn" href="app.html" data-testid="door-continue" hidden>Continue</a>
+        <a class="door-btn" href="app.html?from=splash" data-testid="door-start">Start</a>
+      </div>
+    </section>
+    <section class="door" data-testid="door-screens-card" aria-labelledby="door-screens-t">
+      <h2 id="door-screens-t">See the screens</h2>
+      <p>Every screen and state, grouped by flow.</p>
+      <div class="door-acts">
+        <a class="door-btn primary" href="gallery.html" data-testid="door-screens">Open</a>
+      </div>
+    </section>
   </div>
 </main>
 
-<!-- over the screen: comment pick and pins, marker tags, the coach's ring -->
-<div class="sh-over" id="sh-over" data-testid="sh-over"></div>
-<!-- one polite live line for the coach and the toasts -->
-<p class="sh-sr" id="sh-live" aria-live="polite"></p>
-
-<script src="/simulator/shell/shell.js"></script>
-<script src="/simulator/shell/comments.js"></script>
+<script src="/simulator/shell/doors.js"></script>
 </body>
 </html>

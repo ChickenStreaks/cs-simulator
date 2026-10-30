@@ -8,14 +8,13 @@ simulator is a port of Wirebit's), so its shell, tools and tests work unchanged.
 
 | Path | What |
 |---|---|
-| `sim.js`, `index.html`, `shell/` | the `WB` API; the shell (frame, bar, panels, coach, comments) |
+| `sim.js`, `index.html`, `app.html`, `gallery.html`, `shell/` | the `WB` API; the doors, the app (the device frame and the bar), the gallery |
 | `catalog/<lane>.json` | the screens and their states (§3) |
-| `scenarios/<lane>-<name>.json` | worlds and their «¿Qué pasa si…?» situations (§4) |
-| `stories/<lane>.json` | guided stories and missions (§5) |
+| `scenarios/<lane>-<name>.json` | worlds (§4) |
 | `logic/family-core.js` | the rules as pure functions (`CSCore`), tested by `logic/family-core.test.cjs` |
 | `logic/<lane>.js` | the screens' wiring: `WB.wire` |
 | `screens/app/<name>.html` | the look only, with `data-od-id`s; `_app.css` and `../tokens.css` are shared |
-| `flows/<flow>.md` | the walked flows (§7) |
+| `flows/<flow>.md` | the walked flows (§6) |
 | `screens.json`, `generated/` | **generated** by `tools/build-screens.mjs`; never hand-edit |
 
 ## 1. A screen page
@@ -37,9 +36,9 @@ simulator is a port of Wirebit's), so its shell, tools and tests work unchanged.
 
 ## 2. `data-od-id`
 
-Every element a person could point at in a comment has a stable `data-od-id`, prefixed by the screen
+Every element a test or the logic points at has a stable `data-od-id`, prefixed by the screen
 (`kid-hero`, `kid-mark-ch-sofia-cama`, `approval-ok-mk-…`). Never derived from text or position. The logic finds
-elements by them, so a designer's screen can replace the HTML without touching the logic. Stories target them.
+elements by them, so a designer's screen can replace the HTML without touching the logic.
 
 ## 3. Catalog — `catalog/<lane>.json`
 
@@ -48,7 +47,7 @@ elements by them, so a designer's screen can replace the HTML without touching t
   "id": "app.kid", "title": "El día del hijo", "area": "app", "design": "draft",
   "file": "simulator/screens/app/kid.html", "flow": "simulator/flows/daily-loop.md",
   "states": [ { "id": "default", "title": "Tareas por hacer", "params": { "kid": "p-emi" } },
-              { "id": "missed", "title": "Faltó un día (adulto)", "drive": true, "params": { "kid": "p-sofia" } } ],
+              { "id": "missed", "title": "Faltó un día (adulto)", "drive": true, "params": { "kid": "p-sofia" }, "as": "p-mama" } ],
   "undecided": [ { "question": "¿…?", "ref": "simulator/DECISIONS.md#open" } ] } ] }
 ```
 
@@ -56,8 +55,10 @@ elements by them, so a designer's screen can replace the HTML without touching t
 - `states`: every designed state; each must render with no error (`tests/states.spec.mjs`). A `"drive": true` state is
   shown with `?estado=<id>`: the logic previews it read-only (`PREVIEW` in `logic/family.js`: another viewer or a
   changed copy of the world), never writing the store.
+- `as` (optional): whose eyes the gallery shows the state through, a person of `shell-base`. Without it: the kid in
+  `params` when that kid has a phone, else Mamá.
 
-## 4. Scenarios and situations — `scenarios/*.json`
+## 4. Scenarios — `scenarios/*.json`
 
 A scenario is one complete world; extend the base (`"extends": "shell-base"`): collections merge by `id`,
 `{ "id", "_delete": true }` removes one. Collections: `people`, `chores`, `marks`, `prizes`, `redemptions`,
@@ -65,24 +66,18 @@ A scenario is one complete world; extend the base (`"extends": "shell-base"`): c
 
 - **Times are relative to the visit:** `"now"`, `"-3d"`, `"-50m"`, `"-2d@19:00"` (that day at 19:00, Mexico City).
   A `day` field takes the same and becomes the local date (`"-1d"` → yesterday).
-- **Situations** («¿Qué pasa si…?»): `patch` ops `add` / `set` (`col`, `id`, `fields`) / `remove` / `settings`;
-  `open` the screen; optional `viewAs` and `advance` (`"1h"`, `"24h"`, `"1d"`). «Volver a normal» restores the world.
+- **A moment, from the console or a test:** `WB.state.patch(ops)` with ops `add` / `set` (`col`, `id`, `fields`) /
+  `remove` / `settings`, then `WB.clock.advance("1h" | "24h" | "1d")` and `WBShell.open(screen, params)`.
 - `build-screens` checks the shapes: roles, age ranges, eggs 1–50, known kids and chores, no birthdates.
 
-## 5. Stories — `stories/<lane>.json`
-
-Steps `{ screen, state, kind: read|tap|input|wait, target (a data-od-id), text, sub }`, ≤ 20 words each. The coach
-never advances by itself. Every guided story is walked by `tests/stories.spec.mjs`. **Missions** (`"coach": false`)
-have a `goal` — `{ screen }` or `{ record: { col, id?, match } }` — and an optional `question`.
-
-## 6. The `WB` API
+## 5. The `WB` API
 
 | Call | Does |
 |---|---|
 | `WB.state.get()` · `get(col)` · `get(col, id)` · `list(col, fn?)` | read a copy |
-| `WB.state.update(fn(world), label?)` · `patch(ops, label?)` | write; every document is told; `label` goes to the trail |
+| `WB.state.update(fn(world), label?)` · `patch(ops, label?)` | write; every document is told |
 | `WB.state.subscribe(fn)` · `WB.reset(scenarioId?)` | re-render on change · start over |
-| `WB.viewAs.get()` · `.person()` · `.set(personId)` · `.role()` | «Ver como»: an adult sees the parent mode, a kid theirs |
+| `WB.viewAs.get()` · `.person()` · `.set(personId)` · `.role()` | «See as»: an adult sees the parent mode, a kid theirs |
 | `WB.context()` → `{ kid }` \| `null` · `WB.setScreenContext({ kid })` | the kid a screen is about |
 | `WB.role(personId)` → `'adult'` \| `'kid'` \| `null` · `WB.roleName(role, personId)` → «Papá», «Hija» | |
 | `WB.can(verb, { kid }?)` · `WB.can.detail(…)` → `{ allowed, role, code, reason }` | verbs in `GLOSSARY.md` |
@@ -90,13 +85,12 @@ have a `goal` — `{ screen }` or `{ record: { col, id?, match } }` — and an o
 | `WB.go(id, params?)` · `WB.href(…)` · `WB.back(fallback?)` | navigation |
 | `WB.flow.start(name, { fallback })` · `.finish(result)` · `.exit()` · `.cancel()` | an operation returns to where it started |
 | `WB.wire(screenId, fn(WB, doc))` · `WB.onState(state, fn)` · `WB.setScreenState(state)` · `WB.here()` | screen wiring; say the designed state whenever it changes |
+| `WB.still` — a page opened with `?still=1&as=<person>` | a still (the gallery): the default family in memory, seen as that person; never navigates, never saves |
 | `WB.ui.stateScreen(host, { kind: 'no-access'\|'not-found'\|'empty'\|'error', title, text, primary, secondary?, compact? })` | the one full-screen state |
-| `WB.configurable(el, { key })` · `WB.undecided(el, { question, ref })` · `WB.provisional(el, { decision, ref })` | the markers |
-| `WB.track(label)` · `WB.trail()` | the visitor's last actions, sent with each comment |
-| `WB.timers.later(fn, ms)` | a timer held while the coach waits |
+| `WBShell.open(id, params?)` · `WBShell.here()` · `WBShell.current()` | the shell, from the console or a test |
 | `CSCore.dueChores` · `dayStatus` · `streak` · `eggs` · `stage` · `canForgive` | the rules (`logic/family-core.js`) |
 
-## 7. Flow docs — `flows/<flow>.md`
+## 6. Flow docs — `flows/<flow>.md`
 
 A front-matter header (`id`, `actor`, `trigger`, `status`, `last checked against the simulator: <commit>`), numbered
 steps citing the blueprint's rules («rachas R7»), failure cases F-n, a `## Configurable settings` table

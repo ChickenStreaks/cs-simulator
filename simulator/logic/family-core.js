@@ -8,7 +8,7 @@
      CSCore.stage(w, kid)                 gallina R2, R3: pollito · pollita · gallina · dorada, from the total only
      CSCore.canForgive(w, kid, day, today) rachas R7: a missed day of the last 48 hours
    Days are local 'YYYY-MM-DD' strings (Mexico City). Settings come from world.settings (scenario `shell-base`), so a
-   scenario or a situation can change them.
+   scenario can change them.
    ========================================================================== */
 (function (root) {
   'use strict';

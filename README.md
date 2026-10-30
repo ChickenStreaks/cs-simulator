@@ -1,7 +1,7 @@
 # cs-simulator
 
-The ChickenStreaks app as clickable screens with a fake family: try stories, switch «Ver como», move the clock and
-comment in place. Details: [simulator/README.md](simulator/README.md).
+The ChickenStreaks app as clickable screens with a fake family: «See as», «Theme» and «Reset» in the bar; the rest
+(the clock, a scenario) from the browser console. Details: [simulator/README.md](simulator/README.md).
 
 ```sh
 ln -s ../cs-mobile-ng/packages/blueprint blueprint   # once, optional: serves the product rules at /blueprint/

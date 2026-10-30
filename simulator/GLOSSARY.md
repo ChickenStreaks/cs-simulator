@@ -7,7 +7,7 @@ names its data uses. Screens speak Mexican Spanish; code and flow docs, English.
 
 | Id | Who | Notes |
 |---|---|---|
-| `p-mama` | Lucía, «Mamá» | adult; the default «Ver como» |
+| `p-mama` | Lucía, «Mamá» | adult; «See as» Parent, and the default |
 | `p-papa` | Carlos, «Papá» | adult |
 | `p-sofia` | Sofía, «Sofi», 7–9 | paired phone; 5-day streak; «Tender su cama» waits for approval today |
 | `p-mateo` | Mateo, 10–12 | paired phone; 3-day streak; «Sacar la basura» approves itself |

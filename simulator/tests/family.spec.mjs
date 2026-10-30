@@ -1,17 +1,15 @@
-// The daily loop through the shell (flows/daily-loop.md, flows/prizes.md): «Ver como» changes the app's mode, a mark
+// The daily loop through the shell (flows/daily-loop.md, flows/prizes.md): «See as» changes the app's mode, a mark
 // waits for approval and its eggs arrive on approval, the clock approves by itself, a missed day is forgiven, a new chore
-// returns to where it started, «Empezar de nuevo» brings everything back, and a comment carries its context.
-import fs from 'node:fs';
+// returns to where it started, and «Reset» brings everything back.
 import { test, expect } from '@playwright/test';
-import { openShell, noErrors, screen, waitHere, open, rows, shotFile, mark, backsTo, landed, barItem } from './helpers.mjs';
+import { openShell, noErrors, screen, waitHere, open, backsTo, landed } from './helpers.mjs';
 
 const eggsOf = (page, kid) => page.evaluate((k) => CSCore.eggs(WB.state.get(), k, WB.clock.day()).balance, kid);
 
-test('«Ver como» a kid opens the kid\'s app; a parent screen says it is for parents', async ({ page }) => {
+test('«See as» Kids opens the kid\'s app; a parent screen says it is for parents', async ({ page }) => {
   await openShell(page, { hash: '#app.today' });
   await waitHere(page, 'app.today', 'default');
-  await barItem(page, 'viewas');
-  await page.locator('[data-testid="sh-person-p-sofia"]').click();
+  await page.locator('[data-testid="sh-viewas-kids"]').click();
   await waitHere(page, 'app.kid', 'waiting');
   await expect(screen(page).locator('[data-od-id="kid-hello"]')).toHaveText('Hola, Sofi');
   await open(page, 'app.approvals');
@@ -57,8 +55,13 @@ test('«Repetir» sends it back without punishment: the kid sees «Repítela» (
 
 test('the clock approves a mark nobody approved in 24 hours (tareas R10)', async ({ page }) => {
   await openShell(page);
-  await page.evaluate(() => WB.reset('shell-base'));
-  await page.evaluate(() => WBShell._.applySituation('family-auto-approve'));
+  // from the console: a mark pending 23 hours, then the clock moves 1 hour
+  await page.evaluate(() => {
+    WB.reset('shell-base'); WB.viewAs.set('p-mama');
+    WB.state.patch([{ op: 'add', col: 'marks', item: { id: 'mk-mateo-tarea-old', chore: 'ch-mateo-tarea', kid: 'p-mateo', day: '-1d', at: '-23h', by: 'p-mateo', status: 'pending' } }]);
+    WB.clock.advance('1h');
+  });
+  await open(page, 'app.approvals');
   await waitHere(page, 'app.approvals');
   await expect(screen(page).locator('[data-od-id="approved-mk-mateo-tarea-old"]')).toContainText('Se aprobó sola');
   noErrors(page);
@@ -115,30 +118,20 @@ test('a kid redeems a prize; it waits «Por entregar» until an adult delivers i
   await waitHere(page, 'app.prizes', 'default');
 });
 
-test('«Empezar de nuevo» brings the family back: person, clock, records', async ({ page }) => {
+test('«Reset» in the bar brings the family back: person, clock, records, signed out at the splash', async ({ page }) => {
   await openShell(page);
   await page.evaluate(() => { WB.reset('shell-base'); WB.viewAs.set('p-papa'); WB.clock.advance('1d'); WB.state.update((w) => { w.chores = []; }); });
-  await barItem(page, 'reset');
-  await page.locator('[data-testid="sh-reset-yes"]').click();
-  await expect.poll(() => page.evaluate(() => [WB.viewAs.get().person, WB.state.list('chores').length, Math.abs(WB.clock.now() - Date.now()) < 120e3])).toEqual(['p-mama', 6, true]);
+  await page.locator('[data-testid="sh-reset"]').click();
+  await expect.poll(() => page.evaluate(() => [WB.viewAs.get().person, WB.state.list('chores').length, Math.abs(WB.clock.now() - Date.now()) < 120e3, WB.session.get().signedIn, WBShell.here().screen])).toEqual(['p-mama', 6, true, false, 'app.splash']);
 });
 
-test('a comment carries the screen, the element, «Ver como», the kid and a screenshot', async ({ page }) => {
-  await openShell(page);
-  await page.evaluate(() => { WB.reset('shell-base'); WB.viewAs.set('p-mama'); });
-  await open(page, 'app.kid', { kid: 'p-emi' });
-  await waitHere(page, 'app.kid');
-  await page.locator('[data-testid="sh-comment"]').click();
-  await expect(page.locator('[data-testid="sh-pick"]')).toBeVisible();
-  const box = await screen(page).locator('[data-od-id="kid-hero"]').boundingBox();
-  await page.mouse.click(box.x + 20, box.y + box.height / 2);
-  const text = mark('La gallina se ve pequeña.');
-  await page.locator('[data-testid="sh-comment-text"]').fill(text);
-  await page.locator('[data-testid="sh-comment-send"]').click();
-  await expect(page.locator('[data-testid="sh-toast"]')).toContainText('Enviado', { timeout: 20000 });
-  const r = rows().find((x) => x.text === text);
-  expect(r, 'the row is in comments.jsonl').toBeTruthy();
-  expect(r).toMatchObject({ screen: 'app.kid', screen_unknown: 0, scenario: 'shell-base', view_as_person: 'p-mama', view_as_role: 'adult', view_as_context: 'p-emi', has_shot: 1 });
-  expect(fs.existsSync(shotFile(r.id))).toBe(true);
+test('«Theme» in the bar turns the shell and the screen dark and back', async ({ page }) => {
+  await openShell(page, { hash: '#app.today' });
+  await waitHere(page, 'app.today');
+  await page.locator('[data-testid="sh-theme-dark"]').click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await expect(screen(page).locator('html')).toHaveAttribute('data-theme', 'dark');
+  await page.locator('[data-testid="sh-theme-light"]').click();
+  await expect(screen(page).locator('html')).toHaveAttribute('data-theme', 'light');
   noErrors(page);
 });

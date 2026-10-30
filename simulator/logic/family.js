@@ -58,7 +58,7 @@
   function toast(doc, id, text) {
     var t = q(doc, id); if (!t) return;
     t.textContent = text; t.hidden = false;
-    clearTimeout(toast.t); toast.t = WB.timers.later(function () { t.hidden = true; }, 2600);
+    clearTimeout(toast.t); toast.t = setTimeout(function () { t.hidden = true; }, 2600);
   }
   function ago(iso) {
     var m = Math.round((WB.clock.now() - Date.parse(iso)) / 60e3);
@@ -193,7 +193,7 @@
           + (m.praise ? '«' + esc(m.praise) + '»' : '') + '</span></span><span class="reward"><i class="egg sm"></i>+' + (m.eggs || 0) + '</span></div>';
       }).join('');
       [].forEach.call(doc.querySelectorAll('[data-praise]'), function (b) {
-        b.onclick = function () { var id = b.getAttribute('data-praise'), p = b.textContent; praise[id] = praise[id] === p ? null : p; WB.track('eligió el elogio «' + p + '»'); draw(); };
+        b.onclick = function () { var id = b.getAttribute('data-praise'), p = b.textContent; praise[id] = praise[id] === p ? null : p; draw(); };
       });
       [].forEach.call(doc.querySelectorAll('[data-ok]'), function (b) { b.onclick = function () { approve([b.getAttribute('data-ok')], praise); toast(doc, 'approvals-toast', 'Aprobada. Ya le llegaron sus huevos.'); }; });
       [].forEach.call(doc.querySelectorAll('[data-redo]'), function (b) { b.onclick = function () { redo(b.getAttribute('data-redo')); toast(doc, 'approvals-toast', 'Le pedimos que la repita, sin castigo.'); }; });

@@ -48,12 +48,6 @@
           "title": "Un hijo la abre",
           "drive": true
         }
-      ],
-      "undecided": [
-        {
-          "question": "¿«Repetir» pide un motivo, o basta con el toque?",
-          "ref": "simulator/DECISIONS.md#open"
-        }
       ]
     },
     {
@@ -141,7 +135,8 @@
           "drive": true,
           "params": {
             "kid": "p-sofia"
-          }
+          },
+          "as": "p-mama"
         },
         {
           "id": "rest",

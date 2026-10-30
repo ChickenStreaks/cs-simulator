@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Screens · ChickenStreaks Simulator</title>
+<meta name="description" content="Every screen and state of ChickenStreaks, grouped by flow.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/simulator/screens/tokens.css">
+<link rel="stylesheet" href="/simulator/shell/shell.css">
+<link rel="stylesheet" href="/simulator/shell/pages.css">
+<!-- the gallery reads the catalog (WB.index); its thumbnails are stills (sim.js ?still=1): looking never saves -->
+<script src="/simulator/sim.js"></script>
+</head>
+<body class="sh-page">
+<header class="sh-bar" role="region" aria-label="Simulator">
+  <a class="sh-brand" href="/simulator/" title="The doors"><img class="sh-hen" src="/simulator/screens/img/gallina.png" alt=""><span class="sh-brand-t"><b>ChickenStreaks</b> Simulator</span></a>
+  <span class="sh-grow"></span>
+  <a class="sh-reset gal-app" href="app.html" data-testid="gal-app">Use the app</a>
+</header>
+
+<main class="gallery" id="sh-gallery" data-testid="gallery"></main>
+
+<script src="/simulator/shell/gallery.js"></script>
+</body>
+</html>

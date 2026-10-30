@@ -5,8 +5,7 @@
 //   /blueprint/…              → read-only inputs (the product rules, flows and screen specs)
 //   a screen file the catalog knows by an alias (an Open Design prototype's name) → 302 to the screen's current file,
 //     so a prototype's own link to an old file name lands on whatever the catalog says that screen is today
-//   /api/…                    → the comments backend (server/comments.mjs), mounted by the caller
-// Only 127.0.0.1. GET and HEAD only, except /api/.
+// Only 127.0.0.1. GET and HEAD only.
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -31,7 +30,7 @@ export function aliasMap(root) {
   return map;
 }
 
-// options: { root, api (req, res) => handled?, transformHtml (url, html) => html, dynamic { '/path': () => text }, headers }
+// options: { root, pre (req, res) => handled?, transformHtml (url, html) => html, dynamic { '/path': () => text }, headers }
 export function createSite(opts) {
   const root = opts.root || ROOT;
   const screensJson = () => { try { return JSON.parse(fs.readFileSync(path.join(root, 'simulator', 'screens.json'), 'utf8')); } catch (e) { return {}; } };
@@ -45,7 +44,6 @@ export function createSite(opts) {
         if (/\.html$/.test(p) && !/\/index\.html$/.test(p)) { res.writeHead(308, { location: p.slice(0, -5) + u.search }); return res.end(); }
         if (!/\.[a-z0-9]+$/i.test(p) && !p.endsWith('/') && fs.existsSync(path.join(root, p + '.html'))) p += '.html';
       }
-      if (p.startsWith('/api/')) { if (opts.api && await opts.api(req, res)) return; res.writeHead(404, { 'content-type': 'application/json' }); return res.end('{"error":"not_found"}'); }
       if (req.method !== 'GET' && req.method !== 'HEAD') { res.writeHead(405, { allow: 'GET, HEAD' }); return res.end(); }
       if (p === '/' || p === '/simulator') { res.writeHead(302, { location: '/simulator/' + u.search }); return res.end(); }
       if (p.endsWith('/')) p += 'index.html';

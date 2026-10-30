@@ -5,7 +5,7 @@
    Every page of the simulator loads this file first, as a plain blocking script in <head>:
        <script src="/simulator/sim.js"></script>
    It defines window.WB, then loads (in order, before the page's own scripts run):
-     1. simulator/generated/index.js — WB_INDEX: catalog, scenarios, stories, logic files (GENERATED);
+     1. simulator/generated/index.js — WB_INDEX: catalog, scenarios, logic files (GENERATED);
      2. simulator/logic/<lane>.js   — each lane's logic, which may replace WB.can or WB.role;
      3. WB.__boot()                   — the store is read (or seeded) and WB.ready callbacks run.
 
@@ -19,7 +19,7 @@
   if (window.WB && window.WB.contract) return;   // loaded twice: keep the first
 
   var CONTRACT = '1';
-  var KEY = 'cs-sim/v1', TRAIL_KEY = 'cs-sim/trail', TRAIL_MAX = 8;
+  var KEY = 'cs-sim/v1';
   var TZ = 'America/Mexico_City', TZ_OFFSET = '-06:00';   // Mexico has no daylight saving since 2022
   var HOUR = 3600e3, DAY = 24 * HOUR;
 
@@ -33,21 +33,23 @@
   function warn(msg) { try { console.warn('[WB] ' + msg); } catch (e) {} }
   function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function lsSet(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
-  function ssGet(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }
-  function ssSet(k, v) { try { if (v == null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) {} }
   var seq = 0;
   function newId(prefix) { seq = (seq + 1) % 1e6; return prefix + '-' + Date.now().toString(36) + seq.toString(36) + Math.random().toString(36).slice(2, 5); }
 
   /* ---------- where this document is ---------- */
   var host = null;   // the shell's bridge when this page is the screen inside the simulator's iframe
-  try { if (window.parent !== window && window.parent.WBShell) host = window.parent.WBShell; } catch (e) { host = null; }
+  /* a still (?still=1&as=<person>): a screen shown only to be looked at (the gallery). It sees the standard family,
+     fresh and in memory, as that person; it never navigates, never saves and never hears the other documents. */
+  var still = /[?&]still=1(&|$)/.test(location.search), stillAs = (/[?&]as=([^&#]+)/.exec(location.search) || [])[1] || null;
+  try { if (!still && window.parent !== window && window.parent.WBShell) host = window.parent.WBShell; } catch (e) { host = null; }
 
   var WB = window.WB = {
     contract: CONTRACT,
     base: BASE,
     root: ROOT,
     embedded: !!host,                              // true: inside the shell's iframe
-    isHost: !host,                                 // true: the shell itself, or a screen opened alone
+    isHost: !host && !still,                       // true: the shell itself, or a screen opened alone
+    still: still,                                  // true: a still, for looking only (the gallery)
     index: null                                    // WB_INDEX once loaded
   };
 
@@ -62,11 +64,12 @@
      Store: { v, scenario, seededAt, world, ctx }
        world = people, chores, marks, prizes, redemptions, forgives, pauses, lovis, goals, settings, audit, ext
        ctx   = viewAs { person }, clock { start, offsetMs }, session { signedIn, person, since },
-               theme 'auto'|'light'|'dark', situation id|null
+               theme 'auto'|'light'|'dark'
      ========================================================================== */
   var cache = null;
   function read() {
     if (cache) return cache;
+    if (still) return (cache = stillWorld());
     var raw = lsGet(KEY), s = null;
     if (raw) { try { s = JSON.parse(raw); } catch (e) { s = null; } }
     if (!s || s.v !== 1 || !s.world || !s.ctx) s = null;
@@ -76,14 +79,23 @@
   }
   // a write starts from what is stored, never from this document's copy: the other document (shell or screen) may have
   // written a moment ago and its `storage` event not arrived yet
-  function fresh() { cache = null; return read(); }
+  function fresh() { if (!still) cache = null; return read(); }
+  // a still's world: the default scenario seeded in memory, seen as its person, in the visitor's saved theme
+  function stillWorld() {
+    if (!WB.index) return null;
+    var saved = null; try { saved = JSON.parse(lsGet(KEY)); } catch (e) {}
+    var s = seed(WB.index.defaultScenario);
+    if (saved && saved.ctx && saved.ctx.theme) s.ctx.theme = saved.ctx.theme;
+    if (stillAs) s.ctx.viewAs.person = decodeURIComponent(stillAs);
+    return s;
+  }
   function write(s, ev) {
     cache = s;
-    lsSet(KEY, JSON.stringify(s));
+    if (!still) lsSet(KEY, JSON.stringify(s));
     emit(ev || { type: 'state' });
   }
   window.addEventListener('storage', function (e) {
-    if (e.key !== KEY && e.key !== null) return;
+    if (still || (e.key !== KEY && e.key !== null)) return;
     var before = cache && cache.ctx && cache.ctx.theme;
     cache = null;
     emit({ type: 'external' });
@@ -156,8 +168,7 @@
         viewAs: { person: person },
         clock: { start: new Date(now).toISOString(), offsetMs: 0 },
         session: Object.assign({ signedIn: false, person: person, since: null }, sc.session || {}),
-        theme: (cache && cache.ctx && cache.ctx.theme) || sc.theme || 'auto',
-        situation: null
+        theme: (cache && cache.ctx && cache.ctx.theme) || sc.theme || 'auto'
       }
     };
   }
@@ -182,7 +193,6 @@
       var r = fn(s.world);
       if (r && r !== s.world && typeof r === 'object') s.world = r;
       write(s, { type: 'state', label: label || null });
-      if (label) WB.track(label);
       return clone(s.world);
     },
     subscribe: function (fn) { return WB.subscribe(function (ev) { if (ev.type === 'state' || ev.type === 'external' || ev.type === 'reset') fn(ev); }); },
@@ -255,14 +265,13 @@
       if (WB.isHost) advanceHandlers.forEach(function (h) {
         try { h.fn({ from: new Date(from), to: new Date(to) }); } catch (e) { console.error('[WB] automation ' + h.id + ':', e); }
       });
-      WB.track('adelantó el reloj a ' + WB.clock.format(new Date(to)));
       return WB.clock.now();
     },
     // onAdvance('chores:auto-approve', ({from, to}) => WB.state.update(…)) — runs only in the host document.
     onAdvance: function (id, fn) { advanceHandlers = advanceHandlers.filter(function (h) { return h.id !== id; }); advanceHandlers.push({ id: id, fn: fn }); },
     format: function (d, opts) {
       d = d || WB.clock.now();
-      return new Intl.DateTimeFormat('es-MX', Object.assign({ timeZone: TZ, weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false }, opts || {})).format(new Date(d));
+      return new Intl.DateTimeFormat((opts && opts.locale) || 'es-MX', Object.assign({ timeZone: TZ, weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false }, opts || {})).format(new Date(d));
     },
     // the local day (Mexico City) of a time, 'YYYY-MM-DD' — today by default; day(-1) is yesterday
     day: function (d) {
@@ -289,9 +298,8 @@
         c.session = { signedIn: true, person: personId || c.viewAs.person, since: WB.clock.iso() };
         if (personId) c.viewAs.person = personId;
       }, 'session');
-      WB.track('inició sesión');
     },
-    signOut: function () { setCtx(function (c) { c.session = { signedIn: false, person: c.session.person, since: null }; }, 'session'); WB.track('cerró sesión'); }
+    signOut: function () { setCtx(function (c) { c.session = { signedIn: false, person: c.session.person, since: null }; }, 'session'); }
   };
 
   /* ==========================================================================
@@ -309,7 +317,7 @@
 
   // The kid the screen is about: its ?kid= param, else the «Ver como» person when they are a kid.
   var screenCtx = null;
-  WB.setScreenContext = function (c) { screenCtx = c || null; emit({ type: 'screen' }); if (host && host.screenChanged) try { host.screenChanged(); } catch (e) {} };
+  WB.setScreenContext = function (c) { screenCtx = c || null; emit({ type: 'screen' }); };
   WB.context = function () {
     if (screenCtx) return clone(screenCtx);
     if (WB.params && WB.params.kid) return { kid: WB.params.kid };
@@ -399,9 +407,9 @@
     Object.keys(params || {}).forEach(function (k) { if (params[k] != null) u.searchParams.set(k, params[k]); });
     return u.pathname + u.search;
   };
-  // Go to a screen by id. Inside the shell the shell navigates (and keeps the frame, the coach and the trail).
+  // Go to a screen by id. Inside the shell the shell navigates (and keeps the frame).
   WB.go = function (id, params) {
-    WB.track('abrió ' + ((screenDef(id) && screenDef(id).title) || id));
+    if (still) return;
     if (host && host.go) return host.go(id, params || {});
     if (window.WBShell && window.WBShell.go) return window.WBShell.go(id, params || {});   // called from the shell page itself
     location.href = WB.href(id, params);
@@ -424,7 +432,7 @@
     return Object.keys(all).find(function (k) { return bare(new URL(all[k].file, ROOT).pathname) === p; }) || WB.screenForFile(pathname.split('/').pop());
   };
   // back to the screen before; with nothing before it (opened by link, or a fresh tab) to `fallback` (a screen id), else the default
-  WB.back = function (fallback) { if (host && host.back) return host.back(fallback); if (history.length > 1 || !fallback) history.back(); else WB.go(fallback); };
+  WB.back = function (fallback) { if (still) return; if (host && host.back) return host.back(fallback); if (history.length > 1 || !fallback) history.back(); else WB.go(fallback); };
 
   var here = { screen: null, state: null };
   /* ==========================================================================
@@ -519,7 +527,6 @@
     finish: function (result, o) {
       o = o || {}; var stack = flowsGet(), f = stack[stack.length - 1]; if (!f) return null;
       f.finished = true; f.result = result || 'listo';
-      WB.track('terminó «' + f.name + '»');
       if ((o.origin === 'replace' || o.origin === 'clear') && o.screen) {   // the end takes the origin's place: nothing of the operation stays behind
         stack.pop(); flowsSet(o.origin === 'clear' ? [] : stack);
         setHostRoutes(o.origin === 'clear' ? [] : cutAt(f, false));
@@ -540,7 +547,7 @@
       setHostRoutes(cutAt(f, false));
       replaceTo(f.origin);
     },
-    cancel: function () { var f = WB.flow.current(); if (f) WB.track('canceló «' + f.name + '»'); WB.flow.exit(); },
+    cancel: function () { WB.flow.exit(); },
     leave: function (screen, params) {
       var stack = flowsGet(), f = stack.pop();
       if (!f) { WB.go(screen, params || {}); return; }
@@ -565,12 +572,11 @@
     if (m) return m.content;
     return WB.screenForPath(location.pathname);
   }
-  // A screen says which designed state it shows (catalog «states»). The shell, the coach and comments read it.
+  // A screen says which designed state it shows (catalog «states»). Tests and the console read it (WB.here()).
   WB.setScreenState = function (state) {
     if (here.state === state) return;
     here.state = state;
     emit({ type: 'screen', screen: here.screen, state: state });
-    if (host && host.screenChanged) try { host.screenChanged(); } catch (e) {}
   };
   WB.here = function () { return { screen: here.screen, state: here.state || WB.params.estado || 'default', params: clone(WB.params) }; };
 
@@ -585,47 +591,6 @@
   var wires = {};
   WB.wire = function (screenId, fn) { (wires[screenId] = wires[screenId] || []).push(fn); };
 
-  /* ==========================================================================
-     WB.track — the visitor's last actions, in plain Spanish, carried by every comment (×N groups repeats)
-     ========================================================================== */
-  WB.track = function (label) {
-    if (!label) return;
-    var t; try { t = JSON.parse(ssGet(TRAIL_KEY) || '[]'); } catch (e) { t = []; }
-    var last = t[t.length - 1];
-    if (last && last.a === label) { last.n = (last.n || 1) + 1; last.at = new Date().toISOString(); }
-    else t.push({ a: String(label).slice(0, 120), n: 1, at: new Date().toISOString(), sim: cache ? WB.clock.iso() : null });
-    ssSet(TRAIL_KEY, JSON.stringify(t.slice(-TRAIL_MAX)));
-  };
-  WB.trail = function () { var t; try { t = JSON.parse(ssGet(TRAIL_KEY) || '[]'); } catch (e) { t = []; } return t.map(function (x) { return x.a + (x.n > 1 ? ' ×' + x.n : ''); }); };
-
-  /* ==========================================================================
-     Markers: «Ver lo configurable» and «Ver lo por decidir»
-       WB.configurable(el, { rule: 'rachas R5', default: '2 comodines', label? })  — a setting a person can change (a rule of product/reglas)
-       WB.undecided(el, { question: '¿…?', ref: 'simulator/DECISIONS.md#open' })   — an open owner decision, shown in place
-     The same with attributes: data-wb-configurable="rachas R5" data-wb-default="Activada" · data-wb-undecided="¿…?" data-wb-ref="…"
-     ========================================================================== */
-  WB.configurable = function (el, o) {
-    if (!el || !o) return el;
-    el.setAttribute('data-wb-configurable', o.rule || o.key || '');
-    if (o.default != null) el.setAttribute('data-wb-default', o.default);
-    if (o.label) el.setAttribute('data-wb-label', o.label);
-    return el;
-  };
-  WB.undecided = function (el, o) {
-    if (!el || !o) return el;
-    el.setAttribute('data-wb-undecided', o.question || '');
-    if (o.ref) el.setAttribute('data-wb-ref', o.ref);
-    return el;
-  };
-  /* a decision the founder took as provisional (Addition 10: F1–F7): built, to be confirmed with the founder and Ismael.
-     WB.provisional(el, { decision: 'F3 · El registro sigue las reglas de acceso…', ref: 'simulator/DECISIONS.md#f3' })
-     or data-wb-provisional="…" data-wb-ref="…". «Ver lo por decidir» shows it as «Provisional», apart from «Por decidir». */
-  WB.provisional = function (el, o) {
-    if (!el || !o) return el;
-    el.setAttribute('data-wb-provisional', o.decision || '');
-    if (o.ref) el.setAttribute('data-wb-ref', o.ref);
-    return el;
-  };
   /* ==========================================================================
      WB.ui.stateScreen(host, opts) — the one full-screen state of the simulator: «sin acceso», «no existe», «vacío» and
      «error», app and business web. The canon's StateSheet look (product/pantallas/retail/avisos.md, wirebit-alerts.html):
@@ -704,47 +669,6 @@
       return el;
     }
   };
-  WB.markers = function () {
-    var q = function (sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); };
-    return {
-      configurable: q('[data-wb-configurable]').map(function (el) { return { el: el, rule: el.getAttribute('data-wb-configurable'), def: el.getAttribute('data-wb-default'), label: el.getAttribute('data-wb-label') }; }),
-      undecided: q('[data-wb-undecided]').map(function (el) { return { el: el, question: el.getAttribute('data-wb-undecided'), ref: el.getAttribute('data-wb-ref') }; }),
-      provisional: q('[data-wb-provisional]').map(function (el) { return { el: el, decision: el.getAttribute('data-wb-provisional'), ref: el.getAttribute('data-wb-ref') }; })
-    };
-  };
-
-  /* ==========================================================================
-     Timers held during a story (the coach never lets the app advance by itself): inside the shell, while
-     the shell holds, a screen's timers of 700 ms or more wait until «Siguiente» releases them.
-     ========================================================================== */
-  /* A screen whose timers only animate (catalog "timers": "free") is never held; what it must not do by itself
-     (navigate, settle) goes through WB.timers.later(fn, ms), which is always held during a story. */
-  var HOLD_MS = 1200;   // shorter timers (a spinner, a shake) run; longer ones would move the app on by itself
-  WB.timers = { held: [], holdFrom: HOLD_MS };
-  var realSet = window.setTimeout.bind(window);
-  function holding() { try { return !!(host && host.holding && host.holding()); } catch (e) { return false; } }
-  function hold(fn, args, ms) {
-    var id = realSet(function () {}, 0);
-    WB.timers.held.push({ id: id, fn: fn, args: args, ms: ms });
-    try { host.timerHeld && host.timerHeld(); } catch (e) {}
-    return id;
-  }
-  WB.timers.later = function (fn, ms) { return holding() ? hold(fn, [], ms || 0) : realSet(fn, ms || 0); };
-  if (host) {
-    window.setTimeout = function (fn, ms) {
-      var args = Array.prototype.slice.call(arguments, 2), d = screenDef(here.screen);
-      if (Number(ms) >= HOLD_MS && typeof fn === 'function' && !(d && d.timers === 'free') && holding()) return hold(fn, args, Number(ms));
-      return realSet.apply(null, [fn, ms].concat(args));
-    };
-    var realClear = window.clearTimeout.bind(window);
-    window.clearTimeout = function (id) { WB.timers.held = WB.timers.held.filter(function (t) { return t.id !== id; }); return realClear(id); };
-  }
-  WB.timers.release = function () {
-    var list = WB.timers.held; WB.timers.held = [];
-    list.forEach(function (t) { realSet(function () { t.fn.apply(window, t.args); }, 0); });
-    return list.length;
-  };
-
   /* ==========================================================================
      Boot: index → lane logic → store → ready
      ========================================================================== */
@@ -768,7 +692,6 @@
     var run = function () {
       var st = WB.params.estado;
       if (st && stateHandlers[st]) { try { stateHandlers[st](WB); } catch (e) { console.error(e); } }
-      if (host && host.screenLoaded) try { host.screenLoaded(window); } catch (e) {}
     };
     if (document.readyState === 'complete') setTimeout(run, 0); else window.addEventListener('load', function () { setTimeout(run, 0); });
   };

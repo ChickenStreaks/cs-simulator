@@ -1,17 +1,16 @@
 #!/usr/bin/env node
 // Merges every lane's fragments into the simulator's generated index (never hand-edit the outputs):
-//   simulator/catalog/*.json    → simulator/screens.json            (screen id → file, area, states: what the comments server checks)
-//   + simulator/scenarios/*.json, simulator/stories/*.json, simulator/logic/*.js, the markers (build-configurable.mjs)
+//   simulator/catalog/*.json    → simulator/screens.json            (screen id → file, area, states)
+//   + simulator/scenarios/*.json, simulator/logic/*.js
 //                               → simulator/generated/index.js      (window.WB_INDEX, loaded by sim.js in every page)
 // Checks: unique screen ids (a «provisional» entry gives way to its owner's), files that exist, areas, design, states,
-// scenarios that seed (extends, people, chores, marks, prizes), situations and stories that point at known screens.
+// scenarios that seed (extends, people, chores, marks, prizes).
 // Usage: node simulator/tools/build-screens.mjs [--check] [--render]
 //   --check   exit 1 when screens.json or generated/index.js is out of date (nothing written)
 //   --render  also open every state of every screen in Chromium and fail on a page error or a blank page
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { build as buildMarkers } from './build-configurable.mjs';
 
 export const SIM = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const ROOT = path.resolve(SIM, '..');
@@ -51,13 +50,12 @@ export function loadCatalog() {
 
 const COLS = ['people', 'chores', 'marks', 'prizes', 'redemptions', 'forgives', 'pauses', 'lovis', 'goals'];
 export function loadScenarios(screens) {
-  const bad = [], scenarios = {}, situations = [];
+  const bad = [], scenarios = {};
   for (const f of list(path.join(SIM, 'scenarios'), '.json')) {
     const sc = json(f), id = path.basename(f, '.json');
     if (sc.id && sc.id !== id) bad.push(`${rel(f)}: id «${sc.id}» must be the file name «${id}»`);
     const lane = id.split('-')[0] === 'flow' ? id.split('-').slice(0, 2).join('-') : id.split('-')[0];
     scenarios[id] = Object.assign({}, sc, { id, lane, file: rel(f) });
-    for (const s of sc.situations || []) situations.push(Object.assign({ scenario: id, lane }, s, { file: rel(f) }));
   }
   // resolve each scenario as sim.js will, and check its references
   const resolve = (id, seen = []) => {
@@ -100,45 +98,17 @@ export function loadScenarios(screens) {
     for (const f of [...w.forgives, ...w.pauses, ...w.lovis]) if (!person(f.kid, 'kid')) bad.push(`${at}: ${f.id} kid ${f.kid} unknown`);
     const vs = scenarios[id].viewAs; if (vs && vs.person && !has('people', vs.person)) bad.push(`${at}: viewAs person ${vs.person} unknown`);
   }
-  for (const s of situations) {
-    if (!s.id || !s.title || !s.group) bad.push(`${s.file}: a situation needs id, group and title`);
-    if (!scenarios[s.scenario]) bad.push(`${s.file}: situation ${s.id} scenario ${s.scenario} unknown`);
-    if (s.open && s.open.screen && !screens[s.open.screen]) bad.push(`${s.file}: situation ${s.id} opens unknown screen ${s.open.screen}`);
-  }
-  const dup = situations.map((s) => s.id).filter((x, i, a) => a.indexOf(x) !== i);
-  if (dup.length) bad.push('situation ids twice: ' + [...new Set(dup)].join(', '));
-  return { scenarios, situations, bad };
+  return { scenarios, bad };
 }
 
-export function loadStories(screens) {
-  const bad = [], stories = [];
-  for (const f of list(path.join(SIM, 'stories'), '.json')) {
-    const frag = json(f), lane = frag.lane || path.basename(f, '.json');
-    for (const st of frag.stories || []) {
-      const at = `${rel(f)} ${st.id}`;
-      // a mission (inspiration idea 7, CONTRACT §5): no coach, a goal the world must reach, an optional question at the end
-      if (st.coach === false) {
-        if (!st.id || !st.title) { bad.push(`${at}: a mission needs id and title`); continue; }
-        if (!st.start || !screens[st.start.screen]) bad.push(`${at}: a mission needs start.screen, a known screen`);
-        const g = st.goal || {}, kinds = ['screen', 'record'].filter((k) => g[k]);
-        if (!kinds.length) bad.push(`${at}: a mission needs a goal: screen and/or record`);
-        if (g.screen && !screens[g.screen]) bad.push(`${at}: goal.screen ${g.screen} is not a screen`);
-        if (g.record && !g.record.col) bad.push(`${at}: goal.record needs col`);
-        if (st.question && (!st.question.text || !Array.isArray(st.question.options) || st.question.options.length < 2)) bad.push(`${at}: question needs text and two options or more`);
-        stories.push(Object.assign({ lane }, st, { steps: [], file: rel(f) }));
-        continue;
-      }
-      if (!st.id || !st.title || !Array.isArray(st.steps) || !st.steps.length) { bad.push(`${at}: a story needs id, title and steps`); continue; }
-      st.steps.forEach((p, i) => {
-        if (!p.screen || !screens[p.screen]) bad.push(`${at} step ${i + 1}: unknown screen ${p.screen}`);
-        if (!['read', 'tap', 'wait', 'input'].includes(p.kind || 'read')) bad.push(`${at} step ${i + 1}: kind must be read, tap, wait or input`);
-        if (!p.text) bad.push(`${at} step ${i + 1}: needs text`);
-        if ((p.text || '').split(/\s+/).length + (p.sub || '').split(/\s+/).length > 26) bad.push(`${at} step ${i + 1}: over 20 words`);
-      });
-      stories.push(Object.assign({ lane }, st, { file: rel(f) }));
-    }
+// each flow doc's title (its «# » heading before « — ») and its front matter's order, for the gallery's groups
+export function flowTitles() {
+  const out = {};
+  for (const f of list(path.join(SIM, 'flows'), '.md')) {
+    const text = fs.readFileSync(f, 'utf8');
+    out[rel(f)] = { title: ((/^# (.+)$/m.exec(text) || [])[1] || path.basename(f, '.md')).split(' — ')[0], order: Number((/^order:\s*(\d+)/m.exec(text) || [])[1] || 99) };
   }
-  return { stories, bad };
+  return out;
 }
 
 export function logicFiles() {
@@ -147,27 +117,28 @@ export function logicFiles() {
 
 export function generate() {
   const { screens, bad: b1 } = loadCatalog();
-  const { scenarios, situations, bad: b2 } = loadScenarios(screens);
-  const { stories, bad: b3 } = loadStories(screens);
-  const { bad: b4, data: markers } = buildMarkers(screens);
-  const bad = [...b1, ...b2, ...b3, ...b4];
+  const { scenarios, bad: b2 } = loadScenarios(screens);
+  const bad = [...b1, ...b2];
+  // a state may say whose eyes it is seen through (the gallery's stills): a person of the default family
+  const people = (((scenarios['shell-base'] || {}).data || {}).people || []).map((p) => p.id);
+  for (const s of Object.values(screens)) for (const st of s.states || []) if (st.as && !people.includes(st.as)) bad.push(`${s.file}: state ${s.id} · ${st.id} is seen as ${st.as}, not a person of shell-base`);
   if (!scenarios['shell-base']) bad.push('simulator/scenarios/shell-base.json is missing (the default scenario)');
   const pub = {};
+  const rank = Object.keys(screens);   // the catalog's own order (the gallery shows a flow's screens in it)
   for (const [id, s] of Object.entries(screens).sort()) {
-    pub[id] = { id, title: s.title, area: s.area, file: s.file, aliases: s.aliases || [], design: s.design, owner: s.owner, provisional: !!s.provisional, hidden: !!s.hidden,
-      pilot: s.pilot !== false, flow: s.flow || null, spec: s.spec || null, states: s.states, undecided: s.undecided || [], timers: s.timers || null };
+    pub[id] = { id, n: rank.indexOf(id), title: s.title, area: s.area, file: s.file, aliases: s.aliases || [], design: s.design, owner: s.owner, provisional: !!s.provisional, hidden: !!s.hidden,
+      pilot: s.pilot !== false, flow: s.flow || null, spec: s.spec || null, states: s.states };
   }
   const screensJson = {};
   for (const [id, s] of Object.entries(pub)) screensJson[id] = { file: s.file, area: s.area, title: s.title, design: s.design, owner: s.owner, aliases: s.aliases, states: s.states.map((x) => x.id) };
-  const index = { contract: '1', defaultScenario: 'shell-base', screens: pub, scenarios, situations, stories, logic: logicFiles(), markers };
+  const index = { contract: '1', defaultScenario: 'shell-base', screens: pub, scenarios, flowTitles: flowTitles(), logic: logicFiles() };
   return {
     bad,
     files: {
       [path.join(SIM, 'screens.json')]: JSON.stringify(screensJson, null, 1) + '\n',
-      [path.join(SIM, 'generated', 'index.js')]: '/* GENERATED by simulator/tools/build-screens.mjs from simulator/catalog, scenarios, stories, logic and the markers — never edit by hand. */\nwindow.WB_INDEX = ' + JSON.stringify(index) + ';\n',
-      [path.join(SIM, 'generated', 'markers.json')]: JSON.stringify(markers, null, 1) + '\n'
+      [path.join(SIM, 'generated', 'index.js')]: '/* GENERATED by simulator/tools/build-screens.mjs from simulator/catalog, scenarios, flow titles and logic — never edit by hand. */\nwindow.WB_INDEX = ' + JSON.stringify(index) + ';\n'
     },
-    stats: { screens: Object.keys(pub).length, states: Object.values(pub).reduce((n, s) => n + s.states.length, 0), scenarios: Object.keys(scenarios).length, situations: situations.length, stories: stories.length, logic: index.logic.length }
+    stats: { screens: Object.keys(pub).length, states: Object.values(pub).reduce((n, s) => n + s.states.length, 0), scenarios: Object.keys(scenarios).length, logic: index.logic.length }
   };
 }
 
@@ -179,7 +150,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.a
     if (stale.length) { console.error('build-screens: out of date: ' + stale.join(', ') + ' (run node simulator/tools/build-screens.mjs)'); process.exit(1); }
   } else for (const [f, t] of Object.entries(g.files)) { fs.mkdirSync(path.dirname(f), { recursive: true }); fs.writeFileSync(f, t); }
   const s = g.stats;
-  console.log(`build-screens: ${s.screens} screens · ${s.states} states · ${s.scenarios} scenarios · ${s.situations} situations · ${s.stories} stories · ${s.logic} logic files` + (process.argv.includes('--check') ? ' · up to date' : ''));
+  console.log(`build-screens: ${s.screens} screens · ${s.states} states · ${s.scenarios} scenarios · ${s.logic} logic files` + (process.argv.includes('--check') ? ' · up to date' : ''));
   if (process.argv.includes('--render')) {
     const { renderAll } = await import('./render-states.mjs');
     process.exit(await renderAll());

@@ -1,9 +1,9 @@
 # ChickenStreaks simulator
 
-A clickable ChickenStreaks — the phone app — with a fake family, inside a visitor shell: «Historias», «¿Qué pasa
-si…?», «Ver como» (Mamá, Papá, Sofía, Mateo, Emi), the clock, «Tema», «Ver lo configurable», «Ver lo por decidir»,
-«Comentar» and «Empezar de nuevo». It is where screens get designed and flows get checked before the Expo app builds
-them. Ported from the Wirebit simulator. The contract is [CONTRACT.md](CONTRACT.md), the cast and words
+A clickable ChickenStreaks — the phone app — with a fake family. `/simulator/` opens on two doors: **Use the app**
+(`app.html`: the device frame and one bar — «See as» Parent | Kids, «Theme» Light | Dark, «Reset» — starting at the
+splash, remembering what you do until Reset) and **See the screens** (`gallery.html`: every screen and state). Everything else (the clock, another scenario, anyone of the
+family) is done from the browser console with `WB`. It is where screens get designed and flows get checked before the Expo app builds them. Ported from the Wirebit simulator. The contract is [CONTRACT.md](CONTRACT.md), the cast and words
 [GLOSSARY.md](GLOSSARY.md), the choices it was built on [DECISIONS.md](DECISIONS.md), the rules for agents
 [AGENTS.md](AGENTS.md).
 
@@ -14,7 +14,7 @@ node simulator/tools/hot-serve.mjs   # http://127.0.0.1:4710/simulator/ — only
 node simulator/tools/serve.mjs       # «like production» on :4712, no live reload
 ```
 
-Both bind 127.0.0.1 only. Comments are kept outside the repo, in `~/.cache/claude-builds/cs-simulator/comments/`.
+Both bind 127.0.0.1 only.
 
 ## What is in it
 
@@ -28,9 +28,20 @@ The daily loop of the first version ([flows/daily-loop.md](flows/daily-loop.md),
 | `app.kid` | kid (or adult) | the kid's day: hen, streak by age, today's chores; an adult marks for a kid with no phone and forgives a missed day |
 | `app.prizes` | kid (or adult) | redeem; an adult delivers |
 
-Try: «Historias» → «Aprobar el día», «El día de Sofía», «Crear una tarea», and the mission «Perdona el día de Sofía».
-«¿Qué pasa si…?» → a missed day, an auto-approval after 24 hours, a week-long streak, a prize to deliver. The clock's
-«Mañana 9:00» moves the family to the next day.
+## From the console
+
+Open the browser's console on the simulator page (the shell, not the screen's frame):
+
+```js
+WB.reset()                          // start over (the bar's «Reset»): the base family, the clock back to now, Parent
+WB.reset('family-missed')           // another scenario (scenarios/*.json): Sofía missed yesterday
+WB.clock.advance('1d')              // tomorrow 09:00 ('1h', '24h' too); forward only
+WB.viewAs.set('p-mateo')            // anyone of the family (GLOSSARY.md), beyond the bar's Parent | Kids
+WBShell.open('app.kid', { kid: 'p-emi' })   // a screen, with its params
+WB.state.patch([{ op: 'add', col: 'marks', item: { … } }])   // change the world (CONTRACT §4)
+WB.theme.set('dark')                // 'light', 'auto'
+WBShell.here()                      // the screen and the designed state on show
+```
 
 ## Add a screen
 
@@ -40,19 +51,6 @@ Try: «Historias» → «Aprobar el día», «El día de Sofía», «Crear una t
 3. The catalog entry in `catalog/<lane>.json` with every state (CONTRACT §3).
 4. The flow doc in `flows/` names the screen (AGENTS rule 1).
 5. `node simulator/tools/build-screens.mjs` (hot-serve does it on save).
-
-## Comments
-
-People comment on any element; the AI listening (skill `listen-comments`) answers in «Mis comentarios» and fixes.
-
-```sh
-simulator/tools/sim-comments.py list            # newest first
-simulator/tools/sim-comments.py show <id>       # every field, the last actions, the screenshot path
-simulator/tools/sim-comments.py watch --from-now
-simulator/tools/sim-comments.py status <id> "en arreglo"
-simulator/tools/sim-comments.py reply <id> "Lo arreglo: …"
-simulator/tools/sim-comments.py replay <id>     # that moment again, headless, with a screenshot
-```
 
 ## Test
 
@@ -66,15 +64,15 @@ pnpm check                                      # no browser: generated index cu
 
 | Path | What |
 |---|---|
-| `index.html`, `shell/` | the shell: frame, bar, panels, coach (`shell.js`), comments (`comments.js`) |
-| `sim.js` | the `WB` API: state, «Ver como», clock, navigation, markers |
+| `index.html`, `app.html`, `gallery.html`, `shell/` | the doors (`doors.js`), the app: the device frame and the bar (`shell.js`), the gallery (`gallery.js`); `pages.css` for the doors and the gallery |
+| `sim.js` | the `WB` API: state, «See as», clock, navigation |
 | `logic/family-core.js` | the rules as pure functions (`CSCore`) and their test |
 | `logic/family.js` | the daily loop's screens |
 | `screens/` | the screens, `tokens.css` (draft, from the visual brief), `img/` |
-| `catalog/`, `scenarios/`, `stories/`, `flows/` | screens and states, worlds, stories, walked flows |
+| `catalog/`, `scenarios/`, `flows/` | screens and states, worlds, walked flows |
 | `screens.json`, `generated/` | generated by `tools/build-screens.mjs` |
-| `server/` | the static site and the comments API |
-| `tools/` | servers, builders, `check-flows.mjs`, `sim-comments.py`, test setup |
+| `server/` | the static site |
+| `tools/` | servers, builders, `check-flows.mjs`, `sim-node.cjs`, test setup |
 | `tests/` | Playwright specs |
 
 Left out of the Wirebit port: the SDK contract and its map (ChickenStreaks has no backend yet), the money model, the

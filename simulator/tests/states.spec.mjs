@@ -15,14 +15,13 @@ for (const [id, s] of Object.entries(SCREENS)) {
     page.on('pageerror', (e) => frameErrors.push(e.message));
     const def = await page.evaluate((id) => WB.index.screens[id], id);
     for (const st of def.states) {
-      await page.evaluate(() => sessionStorage.removeItem('wb-shell/story'));
       await open(page, id, st.params || {}, st.drive || (st.params && st.params.estado) ? st.id : null);
       // the screen loaded in the frame
       await page.waitForFunction((id) => { const c = WBShell.current(); return c.id === id; }, id, { timeout: 15000 });
       const reports = await page.evaluate(() => { try { const w = document.getElementById('sh-frame').contentWindow; return !!(w.WB && w.WB.contract); } catch (e) { return false; } });
       if (reports) {
         await page.waitForFunction(([id, state]) => {
-          const h = WBShell._.here(); window.__seen = window.__seen || []; window.__seen.push(h.screen + '·' + h.state);
+          const h = WBShell.here(); window.__seen = window.__seen || []; window.__seen.push(h.screen + '·' + h.state);
           return h.screen === id && h.state === state;
         }, [id, st.id], { timeout: 15000, polling: 50 }).catch(async () => {
           const seen = await page.evaluate(() => [...new Set(window.__seen || [])].slice(-6));
