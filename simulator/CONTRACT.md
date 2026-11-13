@@ -13,7 +13,7 @@ simulator is a port of Wirebit's), so its shell, tools and tests work unchanged.
 | `scenarios/<lane>-<name>.json` | worlds (§4) |
 | `logic/family-core.js` | the rules as pure functions (`CSCore`), tested by `logic/family-core.test.cjs` |
 | `logic/<lane>.js` | the screens' wiring: `WB.wire` |
-| `screens/app/<name>.html` | the look only, with `data-od-id`s; `_app.css` and `../tokens.css` are shared |
+| `screens/app/<name>.html` | the look only, with `data-od-id`s; `_app.css` and `../tokens.css` are shared; `../cs.css` is Open Design's component CSS, unchanged (the Bienvenida and Acceso use it) |
 | `flows/<flow>.md` | the walked flows (§6) |
 | `screens.json`, `generated/` | **generated** by `tools/build-screens.mjs`; never hand-edit |
 

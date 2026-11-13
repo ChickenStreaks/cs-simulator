@@ -7,39 +7,287 @@
 <title>Bienvenida · ChickenStreaks</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/simulator/screens/tokens.css">
-<link rel="stylesheet" href="_app.css">
+<link rel="stylesheet" href="/simulator/screens/cs.css">
+<!-- Ported from Open Design (project ChickenStreaks, bienvenida-v2.html, 2026-11-09): the app content only, without its phone
+     frame and its board. The carousel and the bird are the look; which slide opens and where the buttons lead is logic/start.js. -->
 <style>
-  html,body{height:100%}
-  .ob{height:100%;display:flex;flex-direction:column;padding:24px 0 28px;box-sizing:border-box}
-  .dots{display:flex;gap:6px;justify-content:flex-end;padding:0 24px}
-  .dots i{width:8px;height:8px;border-radius:4px;background:var(--cs-line)}
-  .dots i.on{width:18px;background:var(--cs-action-bg)}
-  .pager{flex:1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
-  .pager::-webkit-scrollbar{display:none}
-  .slide{flex:0 0 100%;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 32px;box-sizing:border-box;text-align:center}
-  .pic{width:200px;height:200px;border-radius:40px;background:var(--cs-card);display:flex;align-items:center;justify-content:center;font-size:96px;margin-bottom:32px}
-  .pic img{width:140px}
-  .slide h2{font-family:Outfit,sans-serif;font-size:32px;margin:0 0 10px}
-  .slide p{color:var(--cs-text-soft);font-size:17px;line-height:1.4;margin:0;max-width:300px}
-  .dock{padding:0 24px;display:flex;flex-direction:column;gap:12px}
-  .dock .btn{height:56px;font-size:17px}
-  .link{background:none;border:0;color:var(--cs-text-soft);font:inherit;padding:10px}
-  .link b{color:var(--cs-text)}
+  html, body { height: 100%; overflow: hidden; }
+  /* ---------- Bienvenida v2 ---------- */
+  .wb { position: absolute; inset: 0; }
+  /* Step indicator: 70 from top, 24 from right. Visual only. */
+  .wb-steps { position: absolute; z-index: 10; top: 70px; right: 24px; display: flex; align-items: center; gap: 6px; }
+  .wb-steps i { display: block; width: 8px; height: 8px; border-radius: 999px; background: color-mix(in srgb, var(--text) 30%, transparent);
+    transition: width var(--dur-slow) var(--ease-standard), background-color var(--dur-slow) var(--ease-standard); }
+  .wb-steps i.on { width: 16px; background: var(--text); }
+
+  /* Glow: below the carousel. It travels with the stage. Dark keeps the warm fogata; light uses a soft ink halo. */
+  .wb-glow { position: absolute; z-index: 0; top: 0; left: 50%; width: 330px; height: 330px; margin-left: -165px; border-radius: 50%; pointer-events: none;
+    background: radial-gradient(circle closest-side, color-mix(in srgb, var(--streak) 24%, transparent) 0%, transparent 70%);
+    transform: translateY(-5px) scale(.66667); transition: transform var(--dur-slow) var(--ease-standard); }
+  .wb[data-at="0"] .wb-glow { transform: translateY(116px) scale(1); }
+  [data-theme=light] .wb-glow { background: radial-gradient(circle closest-side, color-mix(in srgb, var(--text-soft) 28%, transparent) 0%, color-mix(in srgb, var(--text-soft) 28%, transparent) 38%, transparent 70%); }
+
+  /* Carousel: cards and text slide; the bird stage sits above it and never moves with the drag. */
+  .wb-viewport { position: absolute; z-index: 1; top: 59px; left: 0; right: 0; bottom: 0; overflow: hidden; touch-action: pan-y; outline: none; }
+  .wb-viewport:focus-visible { box-shadow: inset 0 0 0 3px var(--focus); }
+  .wb-track { display: flex; height: 100%; transform: translateX(calc(var(--i, 0) * -100% + var(--drag, 0px)));
+    transition: transform var(--dur-slow) var(--ease-standard); will-change: transform; }
+  .wb-track.is-dragging { transition: none; }
+  /* 157 = first card at 216 on screen; 170 = dock top at 698 plus 16 clear. */
+  .wb-slide { box-sizing: border-box; flex: 0 0 100%; height: 100%; display: flex; flex-direction: column; overflow-y: auto; scrollbar-width: none; padding: 157px 0 170px; }
+  .wb-slide::-webkit-scrollbar { display: none; }
+  /* 304 keeps every title top at 520 on screen. */
+  .wb-below { flex: none; min-height: 304px; display: grid; align-content: start; justify-items: center; padding: 0 24px; }
+  .wb-text { flex: none; display: grid; justify-items: center; gap: 12px; padding: 0 24px; text-align: center; }
+  .wb-h { max-width: 325px; margin: 0; font: var(--type-display); letter-spacing: var(--tracking-display); color: var(--text); overflow-wrap: anywhere; }
+  .wb-sub { max-width: 335px; margin: 0; font: var(--type-body-lg); color: var(--text-soft); text-wrap: balance; }
+
+  /* The bird stage: one 192 box. Slides 2–4 show it at 128 with the feet at 196; slide 1 at 192, centered. */
+  .wb-stage { position: absolute; z-index: 2; top: 96px; left: 50%; width: 192px; height: 192px; margin-left: -96px; pointer-events: none; transform-origin: 50% 0;
+    transform: translateY(0) scale(.66667); transition: transform var(--dur-slow) var(--ease-standard); }
+  .wb[data-at="0"] .wb-stage { transform: translateY(77px) scale(1); }
+  .wb-bird { position: absolute; inset: 0; z-index: 1; transform-origin: 50% 78.125%; }
+  .wb-art, .wb-hen { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+  .wb-hen { z-index: 2; }
+
+  /* Fixed dock: does not slide. 24 margins, 46 from the bottom. */
+  .wb-dock { position: absolute; z-index: 12; left: 24px; right: 24px; bottom: 46px; display: grid; gap: 8px; }
+  .wb-login { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 0 6px; min-height: 44px; font: var(--type-body); color: var(--text-soft); text-align: center; }
+  .wb-login .link { display: inline-flex; align-items: center; min-height: 44px; }
+
+  /* ---------- Cards: system components, placed on the slide ---------- */
+  .wb-cards { display: grid; gap: var(--space-3); width: 100%; }
+  .wb-cards .egg-pill { justify-self: center; }
+  .wb-cards .nest-card { grid-template-columns: minmax(0, 1fr); }
+
+  .wb.is-still .wb-track, .wb.is-still .wb-steps i, .wb.is-still .btn, .wb.is-still .wb-stage, .wb.is-still .wb-glow { transition: none !important; }
+  @media (prefers-reduced-motion: reduce) { .wb-track, .wb-steps i, .wb-stage, .wb-glow { transition: none !important; } }
 </style>
 </head>
 <body>
-<main class="ob" data-od-id="onboarding">
-  <div class="dots" data-od-id="onboarding-steps" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></div>
-  <div class="pager" data-od-id="onboarding-pager" aria-label="Bienvenida, 4 pasos">
-    <section class="slide" data-od-id="onboarding-slide-1"><div class="pic"><img src="../img/gallina.png" alt=""></div><h2>ChickenStreaks</h2><p>Buenos hábitos, en familia.</p></section>
-    <section class="slide" data-od-id="onboarding-slide-2"><div class="pic" aria-hidden="true">✅</div><h2>Tareas</h2><p>Tus hijos marcan lo que hicieron y tú lo apruebas.</p></section>
-    <section class="slide" data-od-id="onboarding-slide-3"><div class="pic" aria-hidden="true">🥚</div><h2>Su gallina</h2><p>Cada tarea le da huevos para cambiarlos por premios que tú eliges.</p></section>
-    <section class="slide" data-od-id="onboarding-slide-4"><div class="pic" aria-hidden="true">🔥</div><h2>Rachas sin presión</h2><p>Con comodines y perdón. Nunca rankings entre hermanos.</p></section>
+<main class="wb" data-od-id="onboarding" data-at="0">
+  <div class="wb-glow" aria-hidden="true"></div>
+  <div class="wb-steps" data-od-id="onboarding-steps" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></div>
+  <div class="wb-viewport" data-od-id="onboarding-pager" tabindex="0" role="region" aria-roledescription="carrusel" aria-label="Bienvenida">
+    <div class="wb-track" style="--i:0;--drag:0px">
+      <section class="wb-slide" data-od-id="onboarding-slide-1" aria-roledescription="slide" aria-label="Paso 1 de 4">
+        <div class="wb-below"></div>
+        <div class="wb-text"><h2 class="wb-h">ChickenStreaks</h2><p class="wb-sub">Buenos hábitos, en familia.</p></div>
+      </section>
+      <section class="wb-slide" data-od-id="onboarding-slide-2" aria-roledescription="slide" aria-label="Paso 2 de 4" aria-hidden="true" inert>
+        <div class="wb-below"><div class="wb-cards">
+          <article class="task"><span class="task-icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 19V6M3 14h18v5M21 14v-2a3 3 0 0 0-3-3h-7v5"/><circle cx="7" cy="11" r="2"/></svg></span><div class="task-body"><span class="task-title">Tender la cama</span><div class="task-meta"><span class="chip chip--wait"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>En espera</span></div></div></article>
+          <article class="task"><span class="task-icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4c2 0 3 1 5 1s3-1 5-1c2.5 0 3.5 2.5 3 5-.5 2.5-1.5 4-2 6.5-.4 2-1 4.5-2.5 4.5-1.8 0-1.5-5-3.5-5s-1.7 5-3.5 5C6 20 5.4 17.5 5 15.5 4.5 13 3.5 11.5 3 9c-.5-2.5.5-5 4-5z"/></svg></span><div class="task-body"><span class="task-title">Lavarse los dientes</span><div class="task-meta"><span class="chip chip--ok"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Aprobada</span></div></div></article>
+          <article class="task"><span class="task-icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/><rect x="8.5" y="4" width="7" height="7" rx="1"/></svg></span><div class="task-body"><span class="task-title">Recoger juguetes</span><div class="task-meta"><span class="chip chip--redo"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v5h-5"/></svg>Repítela</span></div></div></article>
+        </div></div>
+        <div class="wb-text"><h2 class="wb-h">Tareas</h2><p class="wb-sub">Tus hijos marcan lo que hicieron y tú lo apruebas.</p></div>
+      </section>
+      <section class="wb-slide" data-od-id="onboarding-slide-3" aria-roledescription="slide" aria-label="Paso 3 de 4" aria-hidden="true" inert>
+        <div class="wb-below"><div class="wb-cards">
+          <span class="egg-pill"><img class="px" src="../img/pixel/huevo.png" width="12" height="15" alt="">12 huevos</span>
+          <div class="reward">
+            <div class="reward-top"><span class="task-icon"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20L12 4l9 16z"/><path d="M9.5 20l2.5-5 2.5 5"/></svg></span><div><span class="reward-name">Ir al parque</span><span class="reward-price eggs"><img class="px" src="../img/pixel/huevo.png" width="12" height="15" alt="cuesta">20</span></div></div>
+            <div class="progress"><div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="20" aria-valuenow="12" aria-label="Huevos para Ir al parque"><span class="progress-fill" style="--p:60%"></span></div>
+              <span class="progress-text">Faltan 8 huevos</span></div>
+          </div>
+        </div></div>
+        <div class="wb-text"><h2 class="wb-h">Su gallina</h2><p class="wb-sub">Cada tarea le da huevos para cambiarlos por premios que tú eliges.</p></div>
+      </section>
+      <section class="wb-slide" data-od-id="onboarding-slide-4" aria-roledescription="slide" aria-label="Paso 4 de 4" aria-hidden="true" inert>
+        <div class="wb-below"><div class="wb-cards">
+          <div class="nest-card"><div class="streak">
+            <span class="streak-cap">Racha de Sofi</span>
+            <span class="streak-num">7<span class="streak-unit">días</span></span>
+            <div class="week" role="img" aria-label="Esta semana: 6 días cumplidos y 1 cuidado por un comodín"><i class="on"></i><i class="on"></i><i class="saved"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div>
+            <span class="wildcards"><img class="px" src="../img/pixel/cojin-heno.png" width="32" height="16" alt=""><span class="wild-slot"></span>1 de 2 comodines</span>
+          </div></div>
+          <div class="nest-card is-paused"><div class="streak">
+            <span class="streak-num">En pausa</span>
+            <span class="paused-note"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>Hoy empieza otra.</span>
+            <span class="streak-best">Mejor racha: 12 días</span>
+          </div></div>
+        </div></div>
+        <div class="wb-text"><h2 class="wb-h">Rachas sin presión</h2><p class="wb-sub">Con comodines y perdón. Nunca rankings entre hermanos.</p></div>
+      </section>
+    </div>
   </div>
-  <div class="dock">
-    <button type="button" class="btn" data-od-id="onboarding-cta">Comenzar</button>
-    <button type="button" class="link" data-od-id="onboarding-sign-in">¿Ya tienes cuenta? <b>Inicia sesión</b></button>
+  <div class="wb-stage" role="img" aria-label="Un huevo">
+    <div class="wb-bird" data-od-id="onboarding-bird"><img class="wb-art" data-layer src="../img/pixel/eclosion/huevo.png" width="192" height="192" alt=""><img class="wb-art" data-layer src="../img/pixel/eclosion/huevo.png" width="192" height="192" alt="" style="opacity:0"></div>
   </div>
+  <div class="wb-dock">
+    <button class="btn btn--lg btn--block" type="button" data-od-id="onboarding-cta"><span class="wb-cta-label">Comenzar</span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    <p class="wb-login">¿Ya tienes cuenta? <a class="link" href="#" data-od-id="onboarding-sign-in">Inicia sesión</a></p>
+  </div>
+  <p class="wb-live" aria-live="polite" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)"></p>
 </main>
+<script>
+  // Open Design's motion: the bird changes when a slide commits, never during a drag. window.CSWelcome is for logic/start.js.
+  (() => {
+  const P = '../img/pixel/';
+  const E = `${P}eclosion/`;
+  const ART = [`${E}huevo.png`, `${P}pollito-contenta.png`, `${P}pollita-contenta.png`, `${P}gallina-contenta.png`];
+  const HATCH = ['grieta-1', 'grieta-2', 'abierto', 'cascaron'].map((n) => `${E}${n}.png`);
+  const BIRDS = ['Un huevo', 'Un pollito', 'Una gallina joven', 'La gallina adulta'];
+  [...ART, ...HATCH].forEach((src) => { new Image().src = src; });
+  const EASE = 'ease-in-out';
+  const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const rock = (el, deg, ms, delay = 0) => el.animate([0, -deg, deg, -deg * .6, deg * .4, 0].map((d) => ({ transform: `rotate(${d}deg)` })), { duration: ms, delay, easing: EASE }).finished;
+  const breathe = (el, ms) => el.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.06)' }, { transform: 'scale(1)' }], { duration: ms, easing: EASE }).finished;
+  const jump = (el, ms) => el.animate([
+    { transform: 'translateY(0) scale(1,1)', easing: 'ease-in-out' },
+    { transform: 'translateY(0) scale(1.06,.92)', offset: .16, easing: 'cubic-bezier(.2,.7,.3,1)' },
+    { transform: 'translateY(-26px) scale(.97,1.04)', offset: .46, easing: 'cubic-bezier(.4,0,.6,1)' },
+    { transform: 'translateY(-28px) scale(1,1)', offset: .56, easing: 'cubic-bezier(.5,0,.9,.4)' },
+    { transform: 'translateY(0) scale(1.05,.94)', offset: .82, easing: 'ease-out' },
+    { transform: 'translateY(0) scale(1,1)' },
+  ], { duration: ms }).finished;
+
+
+  function birdStage(root) {
+    const bird = root.querySelector('.wb-bird');
+    let [front, back] = bird.querySelectorAll('[data-layer]');
+    let run = 0;
+    const stop = () => { run += 1; bird.getAnimations({ subtree: true }).forEach((a) => a.cancel()); return run; };
+
+    async function cross(src, ms, fromY = 0) {
+      const id = run;
+      back.src = src;
+      await back.decode().catch(() => {});
+      if (id !== run) throw new Error('superseded');
+      back.style.zIndex = 1; front.style.zIndex = 0;
+      await Promise.all([
+        back.animate([{ opacity: 0, transform: `translateY(${fromY}px)` }, { opacity: 1, transform: 'translateY(0)' }], { duration: ms, easing: EASE, fill: 'forwards' }).finished,
+        front.animate([{ opacity: 1 }, { opacity: 1, offset: .5 }, { opacity: 0 }], { duration: ms, easing: EASE, fill: 'forwards' }).finished,
+      ]);
+      [front, back] = [back, front];
+      front.style.opacity = 1; back.style.opacity = 0;
+      front.getAnimations().forEach((a) => a.cancel());
+      back.getAnimations().forEach((a) => a.cancel());
+    }
+
+    return {
+      async play(to, from, instant) {
+        const id = stop();
+        if (instant) { front.src = ART[to]; return; }
+        try {
+          if (from === 0 && to === 1) {
+            for (const src of HATCH) await cross(src, 120);
+            await cross(ART[1], 120, -18);
+          } else if (to > from) {
+            await cross(ART[to], 280);
+            await breathe(bird, 380);
+            if (to === 3 && id === run) await jump(bird, 820);
+          } else {
+            await cross(ART[to], 280);
+          }
+        } catch { /* A newer stage change took over. */ }
+      },
+      arrive() { stop(); rock(bird, 5, 800, 350).catch(() => {}); },
+    };
+  }
+
+
+  const root = document.querySelector('.wb');
+  const viewport = root.querySelector('.wb-viewport');
+  const track = root.querySelector('.wb-track');
+  const slides = [...root.querySelectorAll('.wb-slide')];
+  const dots = [...root.querySelectorAll('.wb-steps i')];
+  const stageEl = root.querySelector('.wb-stage');
+  const live = root.querySelector('.wb-live');
+  const stage = birdStage(root);
+  const listeners = [];
+  const instant = () => WB.still || reduced();
+  let index = 0;
+  const paint = () => {
+    track.style.setProperty('--i', index);
+    track.style.setProperty('--drag', '0px');
+    dots.forEach((d, k) => d.classList.toggle('on', k === index));
+    slides.forEach((el, k) => { el.toggleAttribute('inert', k !== index); el.setAttribute('aria-hidden', String(k !== index)); });
+    root.dataset.at = index;
+    stageEl.setAttribute('aria-label', BIRDS[index]);
+    listeners.forEach((fn) => fn(index));
+  };
+  function go(i, announce = true) {
+    const from = index;
+    index = Math.max(0, Math.min(slides.length - 1, i));
+    track.classList.toggle('is-dragging', instant());
+    paint();
+    if (index !== from) stage.play(index, from, instant());
+    if (announce) live.textContent = `Paso ${index + 1} de 4. ${slides[index].querySelector('.wb-sub').textContent}`;
+  }
+  // the slide a screen opens on: no transition, and the egg rocks once if it is the first
+  function set(i, quiet) {
+    root.classList.add('is-still');
+    index = Math.max(0, Math.min(slides.length - 1, i));
+    paint();
+    stage.play(index, index, true);
+    requestAnimationFrame(() => requestAnimationFrame(() => { if (!WB.still) root.classList.remove('is-still'); }));
+    if (index === 0 && !quiet && !instant()) stage.arrive();
+  }
+  // Coming from the splash: its golden hen stays on screen, glides up, lifts away and leaves the new egg behind (Open Design's
+  // proposal). Her feet end the splash at the middle of the screen + 78; on slide 1 they stand at 323.
+  async function handoff() {
+    set(0, true);
+    if (instant()) return;
+    const bird = root.querySelector('.wb-bird');
+    const egg = bird.querySelector('[data-layer]');
+    const ui = ['.wb-viewport', '.wb-dock', '.wb-steps', '.wb-glow'].map((q) => root.querySelector(q));
+    const appear = [...ui, egg];
+    const from = `translateY(${root.getBoundingClientRect().height / 2 + 78 - 323}px)`;
+    const hen = new Image(192, 192);
+    hen.className = 'wb-hen'; hen.alt = ''; hen.src = `${P}gallina-dorada-contenta.png`; hen.style.transform = from;
+    bird.append(hen);
+    appear.forEach((el) => { el.style.opacity = 0; });
+    root.inert = true;
+    const fade = (el, ms, delay = 0) => el.animate({ opacity: [0, 1] }, { duration: ms, delay, easing: EASE, fill: 'both' }).finished;
+    try {
+      await hen.decode().catch(() => {});
+      await new Promise((r) => setTimeout(r, 200));
+      await hen.animate({ transform: [from, 'translateY(0)'] }, { duration: 520, easing: EASE, fill: 'forwards' }).finished;
+      await Promise.all([
+        hen.animate({ transform: ['translateY(0)', 'translateY(-220px)'], opacity: [1, 0] }, { duration: 380, easing: EASE, fill: 'forwards' }).finished,
+        fade(egg, 140), ...ui.map((el) => fade(el, 300, 180)),
+      ]);
+    } finally {
+      appear.forEach((el) => { el.getAnimations().forEach((a) => a.cancel()); el.style.opacity = ''; });
+      egg.style.opacity = 1;
+      hen.remove();
+      root.inert = false;
+    }
+    stage.arrive();
+  }
+  viewport.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') { e.preventDefault(); go(index + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); go(index - 1); }
+  });
+  // Swipe: 18% threshold, 32% rubber band at the ends, vertical moves over 8 px don't drag.
+  let start = null;
+  viewport.addEventListener('pointerdown', (e) => { start = { x: e.clientX, y: e.clientY, w: viewport.getBoundingClientRect().width, dragging: false, cancelled: false }; });
+  viewport.addEventListener('pointermove', (e) => {
+    if (!start || start.cancelled) return;
+    const dx = e.clientX - start.x, dy = e.clientY - start.y;
+    if (!start.dragging) {
+      if (Math.abs(dy) > 8 && Math.abs(dy) > Math.abs(dx)) { start.cancelled = true; return; }
+      if (Math.abs(dx) < 6) return;
+      start.dragging = true;
+      viewport.setPointerCapture(e.pointerId);
+      track.classList.add('is-dragging');
+    }
+    const atEdge = (index === 0 && dx > 0) || (index === slides.length - 1 && dx < 0);
+    track.style.setProperty('--drag', `${(atEdge ? dx * 0.32 : dx) / (start.w / viewport.offsetWidth)}px`);
+  });
+  const end = (e) => {
+    if (!start) return;
+    const dx = e.clientX - start.x, { dragging, w } = start;
+    start = null;
+    if (!dragging) return;
+    track.classList.remove('is-dragging');
+    if (Math.abs(dx) > w * 0.18) go(index + (dx < 0 ? 1 : -1)); else go(index, false);
+  };
+  viewport.addEventListener('pointerup', end);
+  viewport.addEventListener('pointercancel', end);
+  window.CSWelcome = { go, set, handoff, index: () => index, count: slides.length, onChange: (fn) => listeners.push(fn) };
+  })();
+</script>
 </body>
 </html>

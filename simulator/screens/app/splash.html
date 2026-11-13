@@ -6,24 +6,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Splash · ChickenStreaks</title>
 <link rel="stylesheet" href="/simulator/screens/tokens.css">
-<!-- Ported from Open Design (project ChickenStreaks, splash.html, 2026-10-30): the app content only, without its phone
+<!-- Ported from Open Design (project ChickenStreaks, splash.html, as of 2026-11-02): the app content only, without its phone
      frame and its «Reiniciar animación» review button. The hatching is the look; where the app goes next is logic/start.js,
      told by the event «splash:done» when the animation ends. -->
 <style>
-  html,body{margin:0;height:100%;background:var(--cs-bg)}
-  .splash{height:100%;display:grid;grid-template-rows:minmax(0,1fr) auto minmax(0,1fr);justify-items:center;background:var(--cs-bg);color:var(--cs-text)}
-  /* the circle and the hen share a cell; the block is as tall as the hen down to its feet (26 rows × 6 = 156 px), so the
-     logo sits right under it. The circle is decoration: centred on the body, it takes no room. */
+  html,body{margin:0;height:100%;background:var(--bg)}
+  .splash{height:100%;overflow:hidden;display:grid;grid-template-rows:minmax(0,1fr) auto minmax(0,1fr);justify-items:center;background:var(--bg);color:var(--text)}
+  /* the circle and the hen share a cell; the block is as tall as the hen down to its feet (26 rows × 6 = 156 px).
+     The circle is decoration: centred on the body, it takes no room. */
   .splash-hero{grid-row:2;position:relative;display:grid;justify-items:center;align-items:start;height:156px}
-  .glow{position:absolute;z-index:0;left:50%;top:90px;transform:translate(-50%,-50%);pointer-events:none;width:320px;height:320px;border-radius:50%;
-    background:radial-gradient(circle closest-side,var(--cs-card-2) 0%,color-mix(in srgb,var(--cs-card-2) 55%,var(--cs-bg)) 45%,var(--cs-bg) 100%)}
+  .glow{position:absolute;z-index:0;left:50%;top:90px;transform:translate(-50%,-50%);pointer-events:none;width:520px;height:520px;border-radius:50%;
+    background:radial-gradient(circle closest-side,color-mix(in srgb,var(--secondary) 70%,var(--bg)) 0%,color-mix(in srgb,var(--secondary) 40%,var(--bg)) 35%,color-mix(in srgb,var(--secondary) 15%,var(--bg)) 65%,var(--bg) 100%)}
   /* two layers to fade one frame into the next; the whole sways and breathes from the sprite's base (row 25 of 32) */
   .hatch-stack{position:relative;z-index:1;display:grid;transform-origin:50% 78%}
   .hatch-stack > .hatch{grid-area:1 / 1;width:192px;height:192px;display:block}
-  .wordmark{grid-row:3;align-self:start;margin-top:12px;position:relative;z-index:1;width:264px;height:auto;aspect-ratio:464 / 236;
-    opacity:0;transform:translateY(8px) scale(.96);transition:opacity .3s ease-in-out,transform .3s ease-in-out}
-  .wordmark.is-in{opacity:1;transform:none}
-  @media (prefers-reduced-motion:reduce){ .wordmark{transition:none} }
 </style>
 </head>
 <body>
@@ -35,7 +31,6 @@
       <img class="hatch" src="../img/pixel/eclosion/huevo.png" width="192" height="192" alt="" style="opacity:0">
     </div>
   </div>
-  <img class="wordmark" id="wordmark" data-od-id="splash-wordmark" src="../img/logo-chickenstreaks.png" width="464" height="236" alt="">
 </main>
 <script>
   // ≈ 5.4 s, soft ease-in-out: the egg sways, cracks and opens; each stage fades in with a short breath. With reduced
@@ -44,8 +39,8 @@
     const P = '../img/pixel/', E = P + 'eclosion/', EASE = 'ease-in-out';
     const FINAL = P + 'gallina-dorada-contenta.png';
     const FRAMES = [E + 'huevo.png', E + 'grieta-1.png', E + 'grieta-2.png', E + 'abierto.png', E + 'cascaron.png',
-      P + 'pollito-contenta.png', P + 'pollita-contenta.png', P + 'gallina-contenta.png', FINAL, E + 'dorada-feliz.png', '../img/logo-chickenstreaks.png'];
-    const stack = document.getElementById('stack'), wordmark = document.getElementById('wordmark');
+      P + 'pollito-contenta.png', P + 'pollita-contenta.png', P + 'gallina-contenta.png', FINAL, E + 'dorada-feliz.png'];
+    const stack = document.getElementById('stack');
     let [front, back] = stack.querySelectorAll('img');
 
     // every frame loaded first, so no fade starts on an empty image
@@ -81,7 +76,7 @@
     const done = () => { document.documentElement.setAttribute('data-splash', 'done'); document.dispatchEvent(new Event('splash:done')); };
 
     async function play() {
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setFrame(FINAL); wordmark.classList.add('is-in'); return done(); }
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setFrame(FINAL); return done(); }
       setFrame(E + 'huevo.png');
       const steps = [
         () => wait(300), () => rock(7, 800), () => wait(100),                          // it sways
@@ -93,7 +88,7 @@
         () => grow(P + 'pollita-contenta.png'), () => wait(60),
         () => grow(P + 'gallina-contenta.png'), () => wait(60),
         () => grow(FINAL),
-        () => { wordmark.classList.add('is-in'); return Promise.all([cross(E + 'dorada-feliz.png', 220), jump(820)]); },   // the party
+        () => Promise.all([cross(E + 'dorada-feliz.png', 220), jump(820)]),           // the party
         () => wait(220), () => cross(FINAL, 280),
       ];
       for (const step of steps) await step();

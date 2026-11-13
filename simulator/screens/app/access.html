@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<script src="/simulator/sim.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Acceso · ChickenStreaks</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/simulator/screens/tokens.css">
+<link rel="stylesheet" href="/simulator/screens/cs.css">
+<!-- Ported from Open Design (project ChickenStreaks, acceso.html, 2026-11-09 12:25): the app content only, without its phone frame
+     and its review panel. The steps and the checks' feedback are the look; what counts as right and where it leads is logic/start.js. -->
+<style>
+  html, body { height: 100%; overflow: hidden; }
+  #content { position: absolute; inset: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; padding: 59px 0 34px; background: var(--bg); }
+  #content::-webkit-scrollbar { display: none; }
+  /* ---------- ChickenStreaks · acceso ---------- */
+    body { background: var(--bg); color: var(--text); font: var(--type-body); }
+    #app { min-height: 100%; display: grid; }
+    .ob { min-height: 100%; display: flex; flex-direction: column; gap: var(--space-5); padding: var(--space-2) var(--space-6) var(--space-6); color: var(--text); animation: ob-forward var(--dur-slow) var(--ease-standard); }
+    #app[data-dir="back"] .ob { animation-name: ob-back; }
+    @keyframes ob-forward { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: none; } }
+    @keyframes ob-back { from { opacity: 0; transform: translateX(-28px); } to { opacity: 1; transform: none; } }
+    .ob-top { display: flex; align-items: center; justify-content: space-between; min-height: 48px; margin: 0 -6px; }
+    .ob-top-end { display: flex; align-items: center; justify-content: flex-end; gap: 10px; min-width: 44px; }
+    .c-step { font: var(--type-label); color: var(--text-soft); }
+    .sign { display: block; }
+    .ob-body { display: grid; gap: var(--space-4); align-content: start; }
+    .ob-body--fill { flex: 1 1 auto; grid-template-rows: auto auto minmax(0, 1fr); }
+    .ob-stack { display: grid; gap: var(--space-2); }
+    .ob-title { font: 800 3rem/1.05 var(--font-display); letter-spacing: -0.02em; margin: 0; }
+    .ob-title--sm { font: var(--type-title-1); letter-spacing: var(--tracking-title-1); }
+    .ob-title:focus { outline: none; }
+    .ob-lede { font: var(--type-body-lg); color: var(--text-soft); margin: 0; }
+    .ob-lede b { color: var(--text); font-weight: 700; overflow-wrap: anywhere; }
+    .ob-foot { margin-top: auto; display: grid; gap: var(--space-2); padding-top: var(--space-2); }
+    .ob-hero { display: grid; place-items: center; padding: var(--space-4) 0; }
+    .ob-center { text-align: center; justify-items: center; }
+    .ob-mid { margin-top: auto; }
+    .ob-only { margin-bottom: auto; }
+    .ob-glow { position: relative; display: grid; place-items: center; }
+    .ob-glow::before { content: ""; position: absolute; width: 300px; height: 300px; border-radius: 50%; pointer-events: none;
+      background: radial-gradient(circle closest-side, color-mix(in srgb, var(--secondary) 70%, var(--bg)), var(--bg) 100%); }
+    .ob-glow > * { position: relative; }
+    .ob-center > .ob-title, .ob-center > .ob-lede { position: relative; }   /* the glow's edge paints over them otherwise (Open Design's file has this bug) */
+    .ob-alt { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 0 6px; margin: 0; color: var(--text-soft); text-align: center; }
+    .ob-alt .link, .ob-inline .link, .ob-forgot { display: inline-flex; align-items: center; min-height: 44px; }
+    .ob-inline { margin: -8px 0 0; }
+    .ob-forgot { justify-self: start; margin-bottom: -8px; }
+    .ob-note { justify-content: center; text-align: center; }
+    .ob--kid .ob-title { font: 800 2.5rem/1.05 var(--font-display); }
+    .ob--kid .ob-lede { font-size: 1.25rem; }
+    .vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+    @keyframes egg-pop { from { transform: scale(.4); } to { transform: scale(1); } }
+
+    /* Quién usa el teléfono: dos mitades, cada una es un botón */
+    .ob--split { gap: 0; padding: 0; margin: calc(var(--phone-safe-top, 59px) * -1) 0 calc(var(--phone-safe-bottom, 34px) * -1); min-height: calc(100% + var(--phone-safe-top, 59px) + var(--phone-safe-bottom, 34px)); }
+    .split-head { flex: none; padding: 67px var(--space-6) 0; }
+    .split-head .ob-top { margin-bottom: var(--space-2); }
+    .split-title { font: var(--type-title-3); letter-spacing: var(--tracking-title-3); color: var(--text-soft); }
+    .split-btn { --layer: transparent; display: flex; flex-direction: column; justify-content: flex-end; gap: 10px; padding: var(--space-6); border: 0; background: var(--bg); color: var(--text); font: inherit; text-align: left; cursor: pointer; box-shadow: inset 0 0 0 100vmax var(--layer); }
+    @media (hover: hover) { .split-btn:hover { --layer: color-mix(in srgb, currentColor var(--state-hover), transparent); } }
+    .split-btn:active { --layer: color-mix(in srgb, currentColor var(--state-pressed), transparent); }
+    .split-btn:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }
+    .split-btn--adult { flex: 1 1 0; }
+    .split-btn--kid { flex: 0 0 50%; justify-content: space-between; padding-bottom: 46px; background: var(--surface); }
+    .split-spot { align-self: flex-end; display: grid; place-items: center; width: 168px; height: 168px; border-radius: 50%; background: var(--bg); }
+    .split-spot [data-hop] { transform-origin: 50% 100%; }
+    .split-text { display: grid; gap: 10px; }
+    .split-big { display: block; font: 800 2.5rem/1.05 var(--font-display); letter-spacing: -0.02em; }
+    .split-note { display: flex; align-items: center; gap: 8px; font: var(--type-body); color: var(--text-soft); --ic: 20px; }
+
+    /* La gallina como firma: cierra los ojos con la contraseña */
+    .perch .hen-crop { position: relative; }
+    .perch-shut { position: absolute; top: 0; left: 0; opacity: 0; }
+    .perch-open, .perch-shut { transition: opacity var(--dur-fast) var(--ease-standard); }
+    .perch.is-shut .perch-open { opacity: 0; }
+    .perch.is-shut .perch-shut { opacity: 1; }
+    .form-fields { display: grid; gap: var(--space-3); }
+
+    /* Formularios */
+    .input-wrap, .pass-wrap { position: relative; }
+    .input-wrap .input { padding-right: 44px; }
+    .input-ok { position: absolute; top: 14px; right: 14px; display: block; color: var(--approved); --ic: 20px; }
+    .pass-wrap .input { padding-right: 52px; }
+    .pass-eye { position: absolute; top: 2px; right: 2px; }
+    .icon-btn:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+    .pass-rule { display: flex; align-items: center; gap: var(--space-2); margin: 0; font: var(--type-label); font-weight: 500; color: var(--text-soft); }
+    .pass-dot { display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--input-border); color: transparent; --ic: 12px; }
+    .pass-rule.is-ok { color: var(--text); }
+    .pass-rule.is-ok .pass-dot { border-color: var(--approved); background: var(--approved-bg); color: var(--approved); }
+    .agree { --layer: transparent; display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: var(--space-3); align-items: start; min-height: 44px; padding: var(--space-3);
+      background: var(--surface); border: 1.5px solid transparent; border-radius: var(--radius-md); cursor: pointer; box-shadow: inset 0 0 0 100vmax var(--layer); }
+    @media (hover: hover) { .agree:hover { --layer: color-mix(in srgb, currentColor var(--state-hover), transparent); } }
+    .agree:has(input:checked) { border-color: var(--text); }
+    .agree:has(input:focus-visible) { outline: 3px solid var(--focus); outline-offset: 2px; }
+    .agree input { width: 22px; height: 22px; margin: 1px 0 0; accent-color: var(--action); }
+    .legal { display: grid; gap: var(--space-2); }
+    .legal h2 { margin: var(--space-2) 0 0; font: var(--type-title-3); letter-spacing: var(--tracking-title-3); }
+    .legal p { margin: 0; color: var(--text-soft); }
+
+    /* Código de 6 números: el campo real queda encima y transparente */
+    .otp { position: relative; }
+    .otp input { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; margin: 0; border: 0; opacity: 0; font-size: 16px; cursor: text; }
+    .otp-cells { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--space-2); }
+    .otp-cells span { display: grid; place-items: center; height: 64px; border-bottom: 2px solid var(--input-border); font: 800 1.75rem/1 var(--font-display); color: var(--text); }
+    .otp-cells span.is-filled { border-bottom-color: var(--text); animation: egg-pop 240ms var(--ease-spring); }
+    .otp:focus-within .otp-cells span.is-next { border-bottom-color: var(--focus); }
+    .otp-status:empty { display: none; }
+
+    /* Código de familia: cuadros normales */
+    .code-slots { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--space-2); width: 100%; }
+    .code-slots span { display: grid; place-items: center; height: 64px; border-radius: var(--radius-md); border: 1.5px solid var(--input-border); background: var(--surface); font: 800 1.75rem/1 var(--font-display); }
+    .code-slots span.is-next { border: 2px solid var(--focus); }
+    .code-slots span.is-filled { background: var(--action); border-color: transparent; color: var(--on-action); animation: egg-pop 300ms var(--ease-spring); }
+    .code-msg { min-height: 20px; }
+    .keypad { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); width: 100%; }
+    .key { --layer: transparent; display: grid; place-items: center; height: 60px; border: 0; border-radius: var(--radius-lg); background: var(--surface); color: var(--text);
+      font: 700 1.625rem/1 var(--font-display); cursor: pointer; box-shadow: inset 0 0 0 100vmax var(--layer); --ic: 26px; }
+    @media (hover: hover) { .key:hover { --layer: color-mix(in srgb, currentColor var(--state-hover), transparent); } }
+    .key:active { --layer: color-mix(in srgb, currentColor var(--state-pressed), transparent); }
+    .key:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+    .key--blank { visibility: hidden; }
+    .key--del { background: transparent; }
+
+    /* Aves y huevos grandes */
+    .bird-pair { display: flex; align-items: flex-end; gap: var(--space-2); }
+    @media (prefers-reduced-motion: reduce) {
+      .ob, .otp-cells span.is-filled, .code-slots span.is-filled { animation: none !important; }
+    }
+</style>
+</head>
+<body>
+<main id="content">
+<div id="app" data-dir="forward">
+        <section class="ob ob--split" data-screen="rol" data-od-id="access-rol">
+          <div class="split-head">
+            <div class="ob-top"><button class="icon-btn icon-btn--plain" type="button" data-act="leave" data-od-id="access-rol-leave" aria-label="Volver a la bienvenida"><i data-icon="back"></i></button></div>
+            <h1 class="ob-title split-title" tabindex="-1">¿Quién va a usar este teléfono?</h1>
+          </div>
+          <button class="split-btn split-btn--adult" type="button" data-act="adult" data-od-id="access-rol-adult">
+            <span class="split-big">Papá, mamá<br>o tutor</span>
+            <span class="split-note">Crea la cuenta y organiza a tu familia.<svg class="ic od-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+          </button>
+          <button class="split-btn split-btn--kid" type="button" data-act="kid" data-od-id="access-rol-kid">
+            <span class="split-spot"><span class="hen-crop" style="--s:4" data-hop><img class="px" src="../img/pixel/pollito-contenta.png" width="128" height="128" alt="" style="transform: translate(-2px, -24px)"></span></span>
+            <span class="split-text"><span class="split-big">Hijo<br>o hija</span><span class="split-note">Entra con tu código.<svg class="ic od-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
+          </button>
+        </section>
+
+        <section class="ob" data-screen="correo" data-od-id="access-correo" hidden>
+          <div class="ob-top"><button class="icon-btn icon-btn--plain" type="button" data-back aria-label="Volver" data-od-id="access-correo-back"><i data-icon="back"></i></button><span class="ob-top-end"><span class="c-step">1 de 3</span><div class="perch" aria-hidden="true"><span class="hen-crop" style="--s:2"><img class="px perch-open" src="../img/pixel/gallina-contenta.png" width="64" height="64" alt=""><img class="px perch-shut" src="../img/pixel/gallina-dormida.png" width="64" height="64" alt=""></span></div></span></div>
+          <div class="ob-body">
+            <h1 class="ob-title" tabindex="-1">Crea tu cuenta.</h1>
+            <p class="ob-lede">Solo los adultos crean cuenta. Tus hijos entran después con un código.</p>
+          </div>
+          <div class="form-fields">
+              <div class="field">
+                <label class="field-label" for="su-email">Correo</label>
+                <div class="input-wrap"><input class="input" id="su-email" type="email" autocomplete="email" data-rule="email" aria-describedby="su-email-err" inputmode="email" data-od-id="access-su-email"><span class="input-ok" id="su-email-ok" hidden><i data-icon="check"></i></span></div>
+                <p class="field-help field-help--error" id="su-email-err" hidden data-od-id="access-su-email-err"><i data-icon="info"></i><span data-msg></span></p>
+              </div>
+<div class="field">
+                <label class="field-label" for="su-pass">Contraseña</label>
+                <div class="pass-wrap"><input class="input" id="su-pass" type="password" autocomplete="new-password" data-rule="newpass" aria-describedby="su-pass-err su-pass-help" data-secret data-od-id="access-su-pass"><button class="icon-btn icon-btn--plain pass-eye" type="button" data-act="eye" data-for="su-pass" aria-label="Mostrar contraseña" aria-pressed="false" data-od-id="access-correo-eye"><i data-icon="eye"></i></button></div>
+                <p class="pass-rule" id="su-pass-help" data-od-id="access-su-pass-help"><span class="pass-dot"><i data-icon="check"></i></span>Mínimo 8 caracteres</p>
+                <p class="field-help field-help--error" id="su-pass-err" hidden data-od-id="access-su-pass-err"><i data-icon="info"></i><span data-msg></span></p>
+              </div>
+              <p class="ob-inline" id="su-taken" hidden data-od-id="access-su-taken"><a class="link" href="#" data-act="to-login" data-od-id="access-correo-to-login">Entra con ese correo</a></p>
+          </div>
+          <div class="ob-foot">
+            <button class="btn btn--lg btn--block" type="button" data-primary data-act="signup" data-od-id="access-correo-signup">Continuar</button>
+            <p class="ob-alt">¿Ya tienes cuenta? <a class="link" href="#" data-go="entrar" data-od-id="access-correo-go-entrar">Entra aquí</a></p>
+          </div>
+        </section>
+
+        <section class="ob" data-screen="verificar" data-od-id="access-verificar" hidden>
+          <div class="ob-top"><button class="icon-btn icon-btn--plain" type="button" data-back aria-label="Volver" data-od-id="access-verificar-back"><i data-icon="back"></i></button><span class="ob-top-end"><span class="c-step">2 de 3</span><div class="perch" aria-hidden="true"><span class="hen-crop" style="--s:2"><img class="px perch-open" src="../img/pixel/gallina-contenta.png" width="64" height="64" alt=""><img class="px perch-shut" src="../img/pixel/gallina-dormida.png" width="64" height="64" alt=""></span></div></span></div>
+          <div class="ob-body">
+            <h1 class="ob-title" tabindex="-1">Revisa tu correo.</h1>
+            <p class="ob-lede">Enviamos un código a <b data-email></b>.</p>
+            <div class="field">
+              <label class="field-label" for="vf-code">Código de 6 números</label>
+              <div class="otp">
+                <input id="vf-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" data-otp="vf" data-rule="code" data-autofocus aria-describedby="vf-code-err" data-od-id="access-vf-code">
+                <div class="otp-cells" id="vf-cells" aria-hidden="true" data-od-id="access-vf-cells"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+              </div>
+              <p class="field-help field-help--error" id="vf-code-err" hidden data-od-id="access-vf-code-err"><i data-icon="info"></i><span data-msg></span></p>
+            </div>
+            <p class="field-help otp-status" id="vf-status" aria-live="polite" data-od-id="access-vf-status"></p>
+          </div>
+          <div class="ob-foot">
+            <button class="btn btn--block btn--text" type="button" id="vf-resend" data-act="resend" data-otp-id="vf" data-od-id="access-verificar-resend">Reenviar código</button>
+            <button class="btn btn--block btn--text" type="button" data-back data-od-id="access-verificar-back-2">Cambiar correo</button>
+          </div>
+        </section>
+
+        <section class="ob" data-screen="adulto" data-od-id="access-adulto" hidden>
+          <div class="ob-top"><button class="icon-btn icon-btn--plain" type="button" data-back aria-label="Volver" data-od-id="access-adulto-back"><i data-icon="back"></i></button><span class="ob-top-end"><span class="c-step">3 de 3</span><div class="perch" aria-hidden="true"><span class="hen-crop" style="--s:2"><img class="px perch-open" src="../img/pixel/gallina-contenta.png" width="64" height="64" alt=""><img class="px perch-shut" src="../img/pixel/gallina-dormida.png" width="64" height="64" alt=""></span></div></span></div>
+          <div class="ob-body">
+            <h1 class="ob-title" tabindex="-1">Antes de seguir.</h1>
+            <p class="ob-lede">Vas a registrar a menores de edad, así que necesitamos tu permiso.</p>
+            <div class="ob-stack">
+              <label class="agree"><input type="checkbox" id="ad-age" data-consent data-od-id="access-ad-age"><span>Soy mayor de edad y soy responsable de los menores que registre.</span></label>
+              <label class="agree"><input type="checkbox" id="ad-terms" data-consent data-od-id="access-ad-terms"><span>Acepto el aviso de privacidad y los términos de uso.</span></label>
+            </div>
+            <p class="field-help field-help--error" id="ad-err" hidden data-od-id="access-ad-err"><i data-icon="info"></i>Marca las dos casillas para continuar.</p>
+            <a class="link link--standalone" href="#" data-go="aviso" data-od-id="access-adulto-go-aviso">Leer aviso y términos<i data-icon="arrow"></i></a>
+          </div>
+          <div class="ob-foot"><button class="btn btn--lg btn--block" type="button" data-primary data-act="consent" data-od-id="access-adulto-consent">Crear mi cuenta</button></div>
+        </section>
+
+        <section class="ob" data-screen="aviso" data-od-id="access-aviso" hidden>
+          <div class="ob-top"><button class="icon-btn icon-btn--plain" type="button" data-back aria-label="Volver" data-od-id="access-aviso-back"><i data-icon="back"></i></button><span class="ob-top-end"><div class="perch" aria-hidden="true"><span class="hen-crop" style="--s:2"><img class="px perch-open" src="../img/pixel/gallina-contenta.png" width="64" height="64" alt=""><img class="px perch-shut" src="../img/pixel/gallina-dormida.png" width="64" height="64" alt=""></span></div></span></div>
+          <div class="ob-body">
+            <h1 class="ob-title ob-title--sm" tabindex="-1">Aviso de privacidad y términos</h1>
+            <div class="legal">
+              <h2>Qué guardamos</h2>
+              <p>Tu correo, y el nombre o apodo y la edad de cada hijo, con sus tareas, huevos y rachas.</p>
+              <h2>Para qué</h2>
+              <p>Para que la app funcione en tu familia.</p>
+              <h2>Quién decide</h2>
+              <p>Tú administras las cuentas de tus hijos. Los menores no crean cuenta ni dan su correo.</p>
+              <h2>Tus derechos</h2>
+              <p>Puedes pedir que corrijamos o borremos estos datos.</p>
+            </div>
+          </div>
+          <div class="ob-foot"><button class="btn btn--lg btn--block btn--tonal" type="button" data-back data-od-id="access-aviso-back-2">Volver</button></div>
+        </section>
+
+        <section class="ob" data-screen="preparando" data-od-id="access-preparando" hidden>
+          <div class="ob-body ob-mid ob-only">
+            <img class="px" id="prep-egg" src="../img/pixel/eclosion/huevo.png" width="128" height="128" alt="">
+            <h1 class="ob-title" tabindex="-1">Preparando tu granja…</h1>
+          </div>
+        </section>
+
+        <section class="ob" data-screen="listo" data-od-id="access-listo" hidden>
+          <div class="ob-top"><span class="sign"><span class="hen-crop" style="--s:2"><img class="px" src="../img/pixel/gallina-contenta.png" width="64" height="64" alt=""></span></span></div>
+          <div class="ob-body ob-mid">
+            <h1 class="ob-title" tabindex="-1">Tu cuenta está lista.</h1>
+            <p class="ob-lede">Ahora cuéntanos quiénes van a jugar y qué tareas tienen.</p>
+          </div>
+          <div class="ob-foot"><button class="btn btn--lg btn--block" type="button" data-act="enter-adult" data-od-id="access-listo-enter-adult">Configurar mi familia</button></div>
+        </section>
+
+        <section class="ob" data-screen="entrar" data-od-id="access-entrar" hidden>
+          <div class="ob-top"><button class="icon-btn icon-btn--plain" type="button" data-back aria-label="Volver" data-od-id="access-entrar-back"><i data-icon="back"></i></button><span class="ob-top-end"><div class="perch" aria-hidden="true"><span class="hen-crop" style="--s:2"><img class="px perch-open" src="../img/pixel/gallina-contenta.png" width="64" height="64" alt=""><img class="px perch-shut" src="../img/pixel/gallina-dormida.png" width="64" height="64" alt=""></span></div></span></div>
+          <div class="ob-body"><h1 class="ob-title" tabindex="-1">Entra a tu cuenta.</h1></div>
+          <div class="form-fields">
+              <div class="field">
+                <label class="field-label" for="en-email">Correo</label>
+                <div class="input-wrap"><input class="input" id="en-email" type="email" autocomplete="username" data-rule="email" aria-describedby="en-email-err" inputmode="email" data-od-id="access-en-email"><span class="input-ok" id="en-email-ok" hidden><i data-icon="check"></i></span></div>
+                <p class="field-help field-help--error" id="en-email-err" hidden data-od-id="access-en-email-err"><i data-icon="info"></i><span data-msg></span></p>
+              </div>
+<div class="field">
+                <label class="field-label" for="en-pass">Contraseña</label>
+                <div class="pass-wrap"><input class="input" id="en-pass" type="password" autocomplete="current-password" data-rule="pass" aria-describedby="en-pass-err" data-secret data-od-id="access-en-pass"><button class="icon-btn icon-btn--plain pass-eye" type="button" data-act="eye" data-for="en-pass" aria-label="Mostrar contraseña" aria-pressed="false" data-od-id="access-entrar-eye"><i data-icon="eye"></i></button></div>
+                <p class="field-help field-help--error" id="en-pass-err" hidden data-od-id="access-en-pass-err"><i data-icon="info"></i><span data-msg></span></p>
+              </div>
+              <a class="link ob-forgot" href="#" data-go="recuperar" data-od-id="access-entrar-go-recuperar">¿Olvidaste tu contraseña?</a>
+          </div>
+          <div class="ob-foot">
+            <button class="btn btn--lg btn--block" type="button" data-primary data-act="login" data-od-id="access-entrar-login">Entrar</button>
+            <p class="ob-alt">¿No tienes cuenta? <a class="link" href="#" data-go="correo" data-od-id="access-entrar-go-correo">Crea una</a></p>
+          </div>
+        </section>
+
+        <section class="ob" data-screen="recuperar" data-od-id="access-recuperar" hidden>
+          <div class="ob-top"><button class="icon-btn icon-btn--plain" type="button" data-back aria-label="Volver" data-od-id="access-recuperar-back"><i data-icon="back"></i></button><span class="ob-top-end"><div class="perch" aria-hidden="true"><span class="hen-crop" style="--s:2"><img class="px perch-open" src="../img/pixel/gallina-contenta.png" width="64" height="64" alt=""><img class="px perch-shut" src="../img/pixel/gallina-dormida.png" width="64" height="64" alt=""></span></div></span></div>
+          <div class="ob-body">
+            <h1 class="ob-title" tabindex="-1">Recupera tu contraseña.</h1>
+            <p class="ob-lede">Te enviamos un código para crear una nueva.</p>
+          </div>
+          <div class="form-fields">
+              <div class="field">
+                <label class="field-label" for="rc-email">Correo</label>
+                <div class="input-wrap"><input class="input" id="rc-email" type="email" autocomplete="email" data-rule="email" aria-describedby="rc-email-err" inputmode="email" data-od-id="access-rc-email"><span class="input-ok" id="rc-email-ok" hidden><i data-icon="check"></i></span></div>
+                <p class="field-help field-help--error" id="rc-email-err" hidden data-od-id="access-rc-email-err"><i data-icon="info"></i><span data-msg></span></p>
+              </div>
+              
+          </div>
+          <div class="ob-foot"><button class="btn btn--lg btn--block" type="button" data-primary data-act="recover" data-od-id="access-recuperar-recover">Enviar código</button></div>
+        </section>
+
+        <section class="ob" data-screen="rc-codigo" data-od-id="access-rc-codigo" hidden>
+          <div class="ob-top"><button class="icon-btn icon-btn--plain" type="button" data-back aria-label="Volver" data-od-id="access-rc-codigo-back"><i data-icon="back"></i></button><span class="ob-top-end"><div class="perch" aria-hidden="true"><span class="hen-crop" style="--s:2"><img class="px perch-open" src="../img/pixel/gallina-contenta.png" width="64" height="64" alt=""><img class="px perch-shut" src="../img/pixel/gallina-dormida.png" width="64" height="64" alt=""></span></div></span></div>
+          <div class="ob-body">
+            <h1 class="ob-title" tabindex="-1">Revisa tu correo.</h1>
+            <p class="ob-lede">Si <b data-email></b> tiene una cuenta, ahí está tu código.</p>
+            <div class="field">
+              <label class="field-label" for="rc-code">Código de 6 números</label>
+              <div class="otp">
+                <input id="rc-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" data-otp="rc" data-rule="code" data-autofocus aria-describedby="rc-code-err" data-od-id="access-rc-code">
+                <div class="otp-cells" id="rc-cells" aria-hidden="true" data-od-id="access-rc-cells"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+              </div>
+              <p class="field-help field-help--error" id="rc-code-err" hidden data-od-id="access-rc-code-err"><i data-icon="info"></i><span data-msg></span></p>
+            </div>
+            <p class="field-help otp-status" id="rc-status" aria-live="polite" data-od-id="access-rc-status"></p>
+          </div>
+          <div class="ob-foot">
+            <button class="btn btn--block btn--text" type="button" id="rc-resend" data-act="resend" data-otp-id="rc" data-od-id="access-rc-codigo-resend">Reenviar código</button>
+            <button class="btn btn--block btn--text" type="button" data-back data-od-id="access-rc-codigo-back-2">Cambiar correo</button>
+          </div>
+        </section>
+
+        <section class="ob" data-screen="nueva" data-od-id="access-nueva" hidden>
+          <div class="ob-top"><button class="icon-btn icon-btn--plain" type="button" data-back aria-label="Volver" data-od-id="access-nueva-back"><i data-icon="back"></i></button><span class="ob-top-end"><div class="perch" aria-hidden="true"><span class="hen-crop" style="--s:2"><img class="px perch-open" src="../img/pixel/gallina-contenta.png" width="64" height="64" alt=""><img class="px perch-shut" src="../img/pixel/gallina-dormida.png" width="64" height="64" alt=""></span></div></span></div>
+          <div class="ob-body"><h1 class="ob-title" tabindex="-1">Crea una contraseña nueva.</h1></div>
+          <div class="form-fields">
+              <div class="field">
+                <label class="field-label" for="rn-pass">Contraseña nueva</label>
+                <div class="pass-wrap"><input class="input" id="rn-pass" type="password" autocomplete="new-password" data-rule="newpass" aria-describedby="rn-pass-err rn-pass-help" data-secret data-od-id="access-rn-pass"><button class="icon-btn icon-btn--plain pass-eye" type="button" data-act="eye" data-for="rn-pass" aria-label="Mostrar contraseña" aria-pressed="false" data-od-id="access-nueva-eye"><i data-icon="eye"></i></button></div>
+                <p class="pass-rule" id="rn-pass-help" data-od-id="access-rn-pass-help"><span class="pass-dot"><i data-icon="check"></i></span>Mínimo 8 caracteres</p>
+                <p class="field-help field-help--error" id="rn-pass-err" hidden data-od-id="access-rn-pass-err"><i data-icon="info"></i><span data-msg></span></p>
+              </div>
+              
+          </div>
+          <div class="ob-foot"><button class="btn btn--lg btn--block" type="button" data-primary data-act="save-pass" data-od-id="access-nueva-save-pass">Guardar contraseña</button></div>
+        </section>
+
+        <section class="ob" data-screen="renovada" data-od-id="access-renovada" hidden>
+          <div class="ob-top"><span class="sign"><span class="hen-crop" style="--s:2"><img class="px" src="../img/pixel/gallina-contenta.png" width="64" height="64" alt=""></span></span></div>
+          <div class="ob-body ob-mid">
+            <h1 class="ob-title" tabindex="-1">Tu contraseña está lista.</h1>
+            <p class="ob-lede">Ya puedes entrar con ella.</p>
+          </div>
+          <div class="ob-foot"><button class="btn btn--lg btn--block" type="button" data-act="after-reset" data-od-id="access-renovada-after-reset">Entrar</button></div>
+        </section>
+
+        <section class="ob ob--kid" data-screen="codigo" data-od-id="access-codigo" hidden>
+          <div class="ob-top"><button class="icon-btn icon-btn--plain" type="button" data-back aria-label="Volver" data-od-id="access-codigo-back"><i data-icon="back"></i></button><span class="ob-top-end" aria-hidden="true"></span></div>
+          <div class="ob-body">
+            <h1 class="ob-title" tabindex="-1">Escribe tu código</h1>
+            <p class="ob-lede">Tu papá o mamá lo tiene.</p>
+            <div class="code-slots" id="code-slots" aria-hidden="true" data-od-id="access-code-slots"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="code-msg"><p class="field-help field-help--error" id="code-err" hidden data-od-id="access-code-err"><i data-icon="info"></i>Ese código no es. Revísalo otra vez.</p></div>
+            <p id="code-live" class="vh" aria-live="polite" data-od-id="access-code-live"></p>
+            <div class="keypad" id="keypad" role="group" aria-label="Teclado de números" data-od-id="access-keypad"></div>
+          </div>
+          <div class="ob-foot"><p class="ob-alt"><a class="link" href="#" data-go="sincodigo" data-od-id="access-codigo-go-sincodigo">No tengo código</a></p></div>
+        </section>
+
+        <section class="ob ob--kid" data-screen="sincodigo" data-od-id="access-sincodigo" hidden>
+          <div class="ob-top"><button class="icon-btn icon-btn--plain" type="button" data-back aria-label="Volver" data-od-id="access-sincodigo-back"><i data-icon="back"></i></button><span class="ob-top-end" aria-hidden="true"></span></div>
+          <div class="ob-body ob-center ob-mid">
+            <div class="ob-glow ob-hero"><div class="bird-pair"><span class="hen-crop" style="--s:4"><img class="px" src="../img/pixel/gallina-contenta.png" width="128" height="128" alt=""></span><span class="hen-crop" style="--s:3"><img class="px" src="../img/pixel/pollito-contenta.png" width="96" height="96" alt=""></span></div></div>
+            <h1 class="ob-title" tabindex="-1">¡Busca a tu papá o mamá!</h1>
+            <p class="ob-lede">Solo ellos pueden crear la cuenta. Después te darán tu código.</p>
+          </div>
+          <div class="ob-foot">
+            <button class="btn btn--lg btn--block" type="button" data-act="to-adult" data-od-id="access-sincodigo-to-adult">Hay un adulto aquí</button>
+            <button class="btn btn--block btn--text" type="button" data-back data-od-id="access-sincodigo-back-2">Ya tengo un código</button>
+          </div>
+        </section>
+
+        <section class="ob ob--kid" data-screen="hola" data-od-id="access-hola" hidden>
+          <div class="ob-body ob-center ob-mid">
+            <div class="ob-glow ob-hero"><img class="px" id="hola-egg" src="../img/pixel/eclosion/huevo.png" width="192" height="192" alt="Tu huevo"></div>
+            <h1 class="ob-title" tabindex="-1">¡Hola, <span data-kid-name></span>!</h1>
+            <p class="ob-lede">Este es tu huevo. Nacerá con tu primera tarea.</p>
+          </div>
+          <div class="ob-foot"><button class="btn btn--lg btn--block" type="button" data-act="kid-enter" data-od-id="access-hola-kid-enter">Ver mis tareas</button></div>
+        </section>
+</div>
+</main>
+<script>
+  // Open Design's steps, motion and feedback. window.CSAccess is for logic/start.js, which says what is right and where it leads.
+  (() => {
+  const ICONS = {
+    back: '<path d="M15 5l-7 7 7 7"/>',
+    arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+    check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+    info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/>',
+    eye: '<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>',
+    eyeOff: '<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/><path d="M4 4l16 16"/>',
+    del: '<path d="M9 5h11v14H9l-6-7z"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5"/>',
+  };
+  const icon = (n) => `<svg class="ic od-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]}</svg>`;
+  const $ = (q, root = document) => root.querySelector(q);
+  const $$ = (q, root = document) => [...root.querySelectorAll(q)];
+  const content = $('#content');
+  const app = $('#app');
+  $$('i[data-icon]').forEach((el) => { el.outerHTML = icon(el.dataset.icon); });
+
+  let api = null;
+  const state = { intent: 'crear', email: '', kid: null };
+
+  const stack = [];
+  let current = '';
+  let work = null;
+  let checking = false;
+  let tick = null;
+  let loop = null;
+  const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---------- Movimiento: el mismo lenguaje del splash ----------
+  const rockSteps = (deg) => [0, -deg, deg, -deg * .6, deg * .4, 0].map((d) => ({ transform: `rotate(${d}deg)` }));
+  function wobble(cells) {
+    if (reduced()) return;
+    cells.forEach((el) => el.animate(rockSteps(5), { duration: 420, easing: 'ease-in-out' }));
+  }
+
+  // ---------- Trabajo en curso: se cancela al cambiar de pantalla ----------
+  function cancelWork() {
+    if (work) { clearTimeout(work.timer); work.restore(); work = null; }
+    checking = false;
+    clearInterval(tick);
+    if (loop) { loop.cancel(); loop = null; }
+  }
+  function after(ms, done, restore = () => {}) {
+    const job = { restore };
+    job.timer = setTimeout(() => { work = null; restore(); done(); }, ms);
+    work = job;
+  }
+  function busy(btn, label, ms, done) {
+    if (btn.getAttribute('aria-busy') === 'true') return;
+    const html = btn.innerHTML;
+    btn.style.minWidth = `${btn.offsetWidth}px`;
+    btn.setAttribute('aria-busy', 'true');
+    btn.innerHTML = `<span class="spinner" aria-hidden="true"></span>${label}`;
+    after(ms, done, () => {
+      btn.removeAttribute('aria-busy');
+      btn.innerHTML = html;
+      btn.style.minWidth = '';
+    });
+  }
+  function hop(btn, next) {
+    if (work) return;
+    const bird = $('[data-hop]', btn);
+    if (reduced() || !bird) { next(); return; }
+    bird.animate([
+      { transform: 'translateY(0) scale(1,1)' },
+      { transform: 'translateY(0) scale(1.06,.92)', offset: .2 },
+      { transform: 'translateY(-16px) scale(.98,1.03)', offset: .55 },
+      { transform: 'translateY(0) scale(1.04,.96)', offset: .85 },
+      { transform: 'translateY(0) scale(1,1)' },
+    ], { duration: 420, easing: 'ease-in-out' });
+    after(380, next);
+  }
+
+  // ---------- Validación ----------
+  const RULES = {
+    email: (v) => {
+      const s = v.trim();
+      if (!s) return 'Escribe tu correo para continuar.';
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s) ? '' : 'Debe verse como ana@correo.ejemplo.';
+    },
+    newpass: (v) => (v.length >= 8 ? '' : 'Usa al menos 8 caracteres.'),
+    pass: (v) => (v ? '' : 'Escribe tu contraseña para entrar.'),
+    code: (v) => (/^\d{6}$/.test(v) ? '' : 'Escribe los 6 números del código.'),
+  };
+  function setErr(input, msg) {
+    input.setAttribute('aria-invalid', String(Boolean(msg)));
+    const box = $(`#${input.id}-err`);
+    if (box) {
+      box.hidden = !msg;
+      const text = $('[data-msg]', box);
+      if (text) text.textContent = msg || '';
+    }
+    const ok = $(`#${input.id}-ok`);
+    if (ok) ok.hidden = Boolean(msg) || !input.value;
+  }
+  const validate = (input) => {
+    const msg = RULES[input.dataset.rule](input.value);
+    setErr(input, msg);
+    return !msg;
+  };
+  function allValid(ids) {
+    const inputs = ids.map((id) => $(`#${id}`));
+    const results = inputs.map(validate);
+    const bad = results.indexOf(false);
+    if (bad === -1) return true;
+    inputs[bad].focus();
+    return false;
+  }
+
+  // ---------- Códigos de 6 números ----------
+  const OTP_NEXT = { vf: () => go('adulto'), rc: () => go('nueva') };
+  function paintOtp(id) {
+    const value = $(`#${id}-code`).value;
+    $$(`#${id}-cells span`).forEach((cell, i) => {
+      cell.textContent = value[i] ?? '';
+      cell.classList.toggle('is-filled', Boolean(value[i]));
+      cell.classList.toggle('is-next', i === value.length);
+    });
+  }
+  function clearOtp(id) {
+    const input = $(`#${id}-code`);
+    input.value = '';
+    setErr(input, '');
+    input.removeAttribute('aria-invalid');
+    $(`#${id}-status`).textContent = '';
+    paintOtp(id);
+  }
+  function submitOtp(input) {
+    if (work) return;
+    const id = input.dataset.otp;
+    const status = $(`#${id}-status`);
+    input.readOnly = true;
+    status.textContent = 'Verificando…';
+    after(700, () => {
+      if (input.value === api.verifyCode) { OTP_NEXT[id](); return; }
+      const cells = $$(`#${id}-cells span`);
+      wobble(cells);
+      input.value = '';
+      paintOtp(id);
+      setErr(input, 'Ese código no coincide. Pide otro.');
+      input.focus();
+    }, () => {
+      input.readOnly = false;
+      status.textContent = '';
+    });
+  }
+  function startResend(id) {
+    const btn = $(`#${id}-resend`);
+    let left = 30;
+    const show = () => {
+      btn.disabled = left > 0;
+      btn.textContent = left > 0 ? `Reenviar en 0:${String(left).padStart(2, '0')}` : 'Reenviar código';
+    };
+    clearInterval(tick);
+    show();
+    tick = setInterval(() => {
+      left -= 1;
+      show();
+      if (left <= 0) clearInterval(tick);
+    }, 1000);
+  }
+
+  // ---------- Pantallas ----------
+  function paint(id) {
+    $$('[data-email]', content).forEach((el) => { el.textContent = state.email || 'tu correo'; });
+    if (id === 'verificar') { clearOtp('vf'); startResend('vf'); }
+    if (id === 'rc-codigo') { clearOtp('rc'); startResend('rc'); }
+    if (id === 'recuperar' && !$('#rc-email').value) $('#rc-email').value = $('#en-email').value;
+    if (id === 'codigo') {
+      code.length = 0;
+      paintCode();
+      $('#code-err').hidden = true;
+    }
+    if (id === 'preparando') {
+      if (!reduced()) {
+        const egg = $('#prep-egg');
+        egg.style.transformOrigin = '50% 78%';
+        loop = egg.animate(rockSteps(5), { duration: 800, easing: 'ease-in-out', iterations: Infinity });
+      }
+      if (!api.hold) after(1400, () => go('listo', { push: false, dir: 'forward' }));
+    }
+    if (id === 'hola') {
+      state.kid = state.kid || api.previewKid();
+      $$('[data-kid-name]', content).forEach((el) => { el.textContent = state.kid.short; });
+      const egg = $('#hola-egg');
+      if (!reduced()) {
+        egg.style.transformOrigin = '50% 78%';
+        egg.animate(rockSteps(5), { duration: 800, delay: 300, easing: 'ease-in-out' });
+      }
+    }
+  }
+  function go(id, { push = true, dir } = {}) {
+    cancelWork();
+    if (push && current && current !== id) stack.push(current);
+    app.dataset.dir = dir ?? (push ? 'forward' : 'back');
+    $$('.ob', content).forEach((el) => { el.hidden = el.dataset.screen !== id; });
+    current = id;
+    content.scrollTop = 0;
+    paint(id);
+    const screen = $(`[data-screen="${id}"]`);
+    ($('[data-autofocus]', screen) ?? $('.ob-title', screen)).focus({ preventScroll: true });
+    api.onChange(id);
+  }
+  const back = () => go(stack.pop() ?? 'rol', { push: false });
+
+  function updateEyes() {
+    const perch = $(`[data-screen="${current}"] .perch`);
+    if (!perch) return;
+    const active = document.activeElement;
+    perch.classList.toggle('is-shut', Boolean(active?.matches?.('[data-secret]') && active.type === 'password'));
+  }
+  function setEye(btn, shown) {
+    $(`#${btn.dataset.for}`).type = shown ? 'text' : 'password';
+    btn.setAttribute('aria-pressed', String(shown));
+    btn.setAttribute('aria-label', shown ? 'Ocultar contraseña' : 'Mostrar contraseña');
+    btn.innerHTML = icon(shown ? 'eyeOff' : 'eye');
+  }
+
+  // ---------- Código de familia ----------
+  const code = [];
+  const slots = $$('#code-slots span');
+  function paintCode() {
+    slots.forEach((el, i) => {
+      el.textContent = code[i] ?? '';
+      el.classList.toggle('is-filled', Boolean(code[i]));
+      el.classList.toggle('is-next', i === code.length);
+    });
+  }
+  function pressKey(key) {
+    if (checking) return;
+    $('#code-err').hidden = true;
+    if (key === 'del') code.pop();
+    else if (code.length < 6) code.push(key);
+    paintCode();
+    $('#code-live').textContent = `${code.length} de 6 números`;
+    if (code.length < 6) return;
+    checking = true;
+    after(450, () => {
+      const kid = api.kidFor(code.join(''));
+      if (kid) {
+        state.kid = kid;
+        if (reduced()) { go('hola'); return; }
+        slots.forEach((el, i) => el.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-12px)' }, { transform: 'translateY(0)' }], { duration: 320, delay: i * 45, easing: 'ease-in-out' }));
+        after(560, () => go('hola'));
+        return;
+      }
+      checking = false;
+      wobble(slots);
+      code.length = 0;
+      paintCode();
+      $('#code-err').hidden = false;
+      $('#code-live').textContent = 'Ese código no es. Revísalo otra vez.';
+    });
+  }
+  $('#keypad').innerHTML = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'del'].map((k) => {
+    if (!k) return '<span class="key key--blank" aria-hidden="true"></span>';
+    if (k === 'del') return `<button class="key key--del" type="button" data-key="del" data-od-id="access-key-del" aria-label="Borrar">${icon('del')}</button>`;
+    return `<button class="key" type="button" data-key="${k}" data-od-id="access-key-${k}">${k}</button>`;
+  }).join('');
+
+  // ---------- Acciones ----------
+  const ACTIONS = {
+    adult: (btn) => hop(btn, () => go(state.intent === 'entrar' ? 'entrar' : 'correo')),
+    kid: (btn) => hop(btn, () => go('codigo')),
+    eye: (btn) => {
+      setEye(btn, btn.getAttribute('aria-pressed') !== 'true');
+      $(`#${btn.dataset.for}`).focus();
+      updateEyes();
+    },
+    signup: (btn) => {
+      if (!allValid(['su-email', 'su-pass'])) return;
+      const input = $('#su-email');
+      busy(btn, 'Revisando…', 800, () => {
+        if (api.isTaken(input.value.trim().toLowerCase())) {
+          setErr(input, 'Ese correo ya tiene una cuenta.');
+          $('#su-taken').hidden = false;
+          input.focus();
+          return;
+        }
+        state.email = input.value.trim();
+        go('verificar');
+      });
+    },
+    'to-login': () => {
+      $('#en-email').value = $('#su-email').value.trim();
+      go('entrar');
+    },
+    resend: (btn) => {
+      const id = btn.dataset.otpId;
+      startResend(id);
+      $(`#${id}-status`).textContent = 'Te enviamos otro código.';
+    },
+    consent: () => {
+      const ok = $$('[data-consent]', content).every((el) => el.checked);
+      $('#ad-err').hidden = ok;
+      if (ok) go('preparando');
+    },
+    login: (btn) => {
+      if (!allValid(['en-email', 'en-pass'])) return;
+      const pass = $('#en-pass');
+      busy(btn, 'Entrando…', 800, () => {
+        if (pass.value === api.wrongPass) {
+          setErr(pass, 'El correo o la contraseña no coinciden.');
+          pass.focus();
+          return;
+        }
+        api.enterAdult();
+      });
+    },
+    recover: (btn) => {
+      if (!allValid(['rc-email'])) return;
+      busy(btn, 'Enviando…', 800, () => {
+        state.email = $('#rc-email').value.trim();
+        go('rc-codigo');
+      });
+    },
+    'save-pass': (btn) => {
+      if (!allValid(['rn-pass'])) return;
+      busy(btn, 'Guardando…', 800, () => {
+        stack.length = 0;
+        go('renovada', { push: false, dir: 'forward' });
+      });
+    },
+    'after-reset': () => {
+      stack.length = 0;
+      $('#en-pass').value = '';
+      go('entrar', { push: false, dir: 'forward' });
+    },
+    'to-adult': () => {
+      state.intent = 'crear';
+      go('correo');
+    },
+    'kid-enter': () => api.enterKid(state.kid),
+    leave: () => api.leave(),
+    'enter-adult': () => api.enterAdult(),
+  };
+
+  content.addEventListener('click', (e) => {
+    const key = e.target.closest('[data-key]');
+    if (key) { pressKey(key.dataset.key); return; }
+    if (e.target.closest('[data-back]')) { back(); return; }
+    const target = e.target.closest('[data-go]');
+    if (target) { e.preventDefault(); go(target.dataset.go); return; }
+    const action = e.target.closest('[data-act]');
+    if (action) { e.preventDefault(); ACTIONS[action.dataset.act](action); }
+  });
+  content.addEventListener('focusin', updateEyes);
+  content.addEventListener('focusout', (e) => {
+    updateEyes();
+    const input = e.target.closest?.('input[data-rule]');
+    if (input && !input.readOnly && (input.value || input.getAttribute('aria-invalid') === 'true')) validate(input);
+  });
+  content.addEventListener('input', (e) => {
+    const input = e.target.closest?.('input[data-rule]');
+    if (!input) return;
+    if (input.dataset.otp) {
+      input.value = input.value.replace(/\D/g, '').slice(0, 6);
+      paintOtp(input.dataset.otp);
+      if (input.getAttribute('aria-invalid') === 'true') setErr(input, '');
+      if (input.value.length === 6) submitOtp(input);
+      return;
+    }
+    if (input.id === 'su-email') $('#su-taken').hidden = true;
+    if (input.dataset.rule === 'newpass') $(`#${input.id}-help`)?.classList.toggle('is-ok', input.value.length >= 8);
+    const msg = RULES[input.dataset.rule](input.value);
+    const ok = $(`#${input.id}-ok`);
+    if (ok && msg) ok.hidden = true;
+    if (input.getAttribute('aria-invalid') === 'true' && !msg) setErr(input, '');
+  });
+  content.addEventListener('change', (e) => {
+    if (e.target.matches('[data-consent]') && $$('[data-consent]', content).every((el) => el.checked)) $('#ad-err').hidden = true;
+  });
+  content.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' || !e.target.matches('input[data-rule]')) return;
+    e.preventDefault();
+    if (e.target.dataset.otp) { if (validate(e.target)) submitOtp(e.target); return; }
+    $(`[data-screen="${current}"] [data-primary]`)?.click();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (current !== 'codigo') return;
+    if (/^[0-9]$/.test(e.key)) pressKey(e.key);
+    if (e.key === 'Backspace') pressKey('del');
+  });
+
+  paintCode();
+  window.CSAccess = { connect(hooks) { api = hooks; state.intent = hooks.intent; go(hooks.start, { push: false, dir: 'forward' }); } };
+  })();
+</script>
+</body>
+</html>

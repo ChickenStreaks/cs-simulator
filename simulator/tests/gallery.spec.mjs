@@ -11,7 +11,7 @@ const STATES = Object.entries(SCREENS).filter(([id]) => !id.startsWith('dev.')).
 
 test('every state of every app screen, grouped by flow, in order', async ({ page }) => {
   await page.goto('/simulator/gallery.html');
-  await expect(page.locator('[data-testid="gal-group"] h2')).toHaveText(['First open', 'The daily loop', 'Prizes']);
+  await expect(page.locator('[data-testid="gal-group"] h2')).toHaveText(['First open', 'Access', 'The daily loop', 'Prizes']);
   await expect(page.locator('[data-testid="gal-item"]')).toHaveCount(STATES);
 });
 

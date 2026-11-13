@@ -1,4 +1,29 @@
 {
+ "app.access": {
+  "file": "simulator/screens/app/access.html",
+  "area": "app",
+  "title": "Acceso",
+  "design": "draft",
+  "owner": "start",
+  "aliases": [],
+  "states": [
+   "rol",
+   "correo",
+   "verificar",
+   "adulto",
+   "aviso",
+   "preparando",
+   "listo",
+   "entrar",
+   "recuperar",
+   "rc-codigo",
+   "nueva",
+   "renovada",
+   "codigo",
+   "sincodigo",
+   "hola"
+  ]
+ },
  "app.approvals": {
   "file": "simulator/screens/app/approvals.html",
   "area": "app",

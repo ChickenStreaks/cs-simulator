@@ -24,13 +24,13 @@ test('after the slides the doors offer Continue and Start from the splash', asyn
   await open(page, 'app.onboarding', {}, 'slide-4');
   await waitHere(page, 'app.onboarding', 'slide-4');
   await screen(page).locator('[data-od-id="onboarding-cta"]').click();
-  await waitHere(page, 'app.today');
+  await waitHere(page, 'app.access');
   await page.goto('/simulator/');
   await expect(page.locator('[data-testid="door-continue"]')).toBeVisible();
   await expect(page.locator('[data-testid="door-start"]')).toHaveText('Start from the splash');
   await page.locator('[data-testid="door-continue"]').click();
   await ready(page);
-  await waitHere(page, 'app.today');
+  await waitHere(page, 'app.access');
 });
 
 test('leaving the app mid-way, even signed out on a slide, the doors offer Continue back to that screen', async ({ page }) => {

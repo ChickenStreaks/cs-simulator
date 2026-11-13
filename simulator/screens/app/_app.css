@@ -23,8 +23,8 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid 
 .card { background: var(--cs-card); border-radius: var(--cs-radius-card); padding: 14px; box-shadow: var(--cs-shadow); }
 .hero { display: grid; grid-template-columns: 96px 1fr; gap: 12px; align-items: center; position: relative; overflow: hidden; }
 .hero::before { content: ""; position: absolute; left: -40px; top: -40px; width: 200px; height: 200px; background: radial-gradient(circle, color-mix(in srgb, var(--cs-streak) 22%, transparent), transparent 70%); pointer-events: none; }
-.hen { width: 96px; height: 96px; image-rendering: pixelated; position: relative; display: grid; place-items: center; font-size: 64px; }
-.hen img { width: 96px; image-rendering: pixelated; }
+.hen { width: 96px; height: 96px; position: relative; display: grid; place-items: center; font-size: 64px; }
+.hen img { width: 96px; }
 .hen[data-stage=dorada] img { filter: sepia(1) saturate(4) hue-rotate(-12deg) brightness(1.08); }
 .hen[data-mood=sleep] img { filter: grayscale(.5) brightness(.8); }
 .big { font: 800 38px/1 var(--cs-font-display); }
