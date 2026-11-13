@@ -63,6 +63,18 @@
    "no-access"
   ]
  },
+ "app.hen": {
+  "file": "simulator/screens/app/hen.html",
+  "area": "app",
+  "title": "Mi gallina",
+  "design": "draft",
+  "owner": "family",
+  "aliases": [],
+  "states": [
+   "default",
+   "no-access"
+  ]
+ },
  "app.kid": {
   "file": "simulator/screens/app/kid.html",
   "area": "app",
@@ -116,6 +128,18 @@
   "aliases": [],
   "states": [
    "default"
+  ]
+ },
+ "app.streak": {
+  "file": "simulator/screens/app/streak.html",
+  "area": "app",
+  "title": "Racha",
+  "design": "draft",
+  "owner": "family",
+  "aliases": [],
+  "states": [
+   "default",
+   "no-access"
   ]
  },
  "app.today": {

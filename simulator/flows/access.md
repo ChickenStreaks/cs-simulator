@@ -4,12 +4,14 @@ actor: an adult creating an account or signing in, or a kid linking a phone
 trigger: the end of the slides («Continuar» or «Inicia sesión»)
 status: draft
 order: 1
-last checked against the simulator: 6f6ff8e
+last checked against the simulator: 2ad80d2
 ---
 
 # Access — sign-up, sign-in and a kid's code
 
 Screen: `app.access` (Open Design's Acceso; DECISIONS F9). Accounts and codes are pretend: nothing leaves the page.
+Every 6-number code (e-mail, recovery, kid) is typed into six rounded, tonal boxes; a wrong one turns their borders violet
+(Open Design 1.3.0, decision 35).
 Practice values: e-mail code `123456` (sign-up and password recovery); Sofía's code `482936`, Mateo's `735924`; a taken e-mail is any of the cast's, such as
 `lucia@correo.ejemplo`; the wrong password is `incorrecta`.
 

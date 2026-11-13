@@ -165,6 +165,52 @@
       ]
     },
     {
+      "id": "app.hen",
+      "title": "Mi gallina",
+      "area": "app",
+      "design": "draft",
+      "provisional": true,
+      "file": "simulator/screens/app/hen.html",
+      "flow": "simulator/flows/daily-loop.md",
+      "states": [
+        {
+          "id": "default",
+          "title": "Su etapa y la que sigue",
+          "as": "p-sofia",
+          "drive": true
+        },
+        {
+          "id": "no-access",
+          "title": "Un adulto",
+          "drive": true,
+          "for": "kid"
+        }
+      ]
+    },
+    {
+      "id": "app.streak",
+      "title": "Racha",
+      "area": "app",
+      "design": "draft",
+      "provisional": true,
+      "file": "simulator/screens/app/streak.html",
+      "flow": "simulator/flows/daily-loop.md",
+      "states": [
+        {
+          "id": "default",
+          "title": "Racha y comodines",
+          "as": "p-sofia",
+          "drive": true
+        },
+        {
+          "id": "no-access",
+          "title": "Un adulto",
+          "drive": true,
+          "for": "kid"
+        }
+      ]
+    },
+    {
       "id": "app.prizes",
       "title": "Premios",
       "area": "app",

@@ -9,9 +9,15 @@ import { waitHere } from './helpers.mjs';
 const SCREENS = JSON.parse(fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'screens.json'), 'utf8'));
 const STATES = Object.entries(SCREENS).filter(([id]) => !id.startsWith('dev.')).reduce((n, [, s]) => n + s.states.length, 0);
 
-test('every state of every app screen, grouped by flow, in order', async ({ page }) => {
+test('every state of every app screen, by who sees it, then grouped by flow in order', async ({ page }) => {
   await page.goto('/simulator/gallery.html');
-  await expect(page.locator('[data-testid="gal-group"] h2')).toHaveText(['First open', 'Access', 'The daily loop', 'Prizes']);
+  await expect(page.locator('[data-testid="gal-section"] > h2')).toHaveText(['Before signing in', 'Parent', 'Kid']);
+  const flows = (key) => page.locator(`[data-testid="gal-section"][data-for="${key}"] [data-testid="gal-group"] h3`);
+  await expect(flows('anyone')).toHaveText(['First open', 'Access']);
+  await expect(flows('adult')).toHaveText(['Access', 'The daily loop']);   // every prize state is seen as Sofía
+  await expect(flows('kid')).toHaveText(['Access', 'The daily loop', 'Prizes']);
+  await expect(page.locator('[data-for="kid"] [data-screen="app.access"]')).toHaveCount(3);   // the kid's code, no code, hello
+  await expect(page.locator('[data-for="adult"] [data-screen="app.today"]')).toHaveCount(3);
   await expect(page.locator('[data-testid="gal-item"]')).toHaveCount(STATES);
 });
 

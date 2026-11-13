@@ -103,17 +103,15 @@
     /* Código de 6 números: el campo real queda encima y transparente */
     .otp { position: relative; }
     .otp input { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; margin: 0; border: 0; opacity: 0; font-size: 16px; cursor: text; }
-    .otp-cells { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--space-2); }
-    .otp-cells span { display: grid; place-items: center; height: 64px; border-bottom: 2px solid var(--input-border); font: 800 1.75rem/1 var(--font-display); color: var(--text); }
-    .otp-cells span.is-filled { border-bottom-color: var(--text); animation: egg-pop 240ms var(--ease-spring); }
-    .otp:focus-within .otp-cells span.is-next { border-bottom-color: var(--focus); }
+    /* Campos de código · estilo B «relleno tonal», el mismo para correo, recuperación e hijo (Open Design, decisión 35) */
+    .otp-cells, .code-slots { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--space-2); width: 100%; }
+    .otp-cells span, .code-slots span { display: grid; place-items: center; height: 64px; border-radius: 14px; border: 1.5px solid color-mix(in srgb, var(--input-border) 70%, var(--surface-2)); background: var(--surface-2); font: 800 1.75rem/1 var(--font-display); font-variant-numeric: tabular-nums; color: var(--text); transition: border-color var(--dur-fast) var(--ease-standard), box-shadow var(--dur-fast) var(--ease-standard); }
+    .otp-cells span.is-filled, .code-slots span.is-filled { border-color: var(--input-border); animation: egg-pop 240ms var(--ease-spring); }
+    .otp:focus-within .otp-cells span.is-next, .code-slots span.is-next { border: 2px solid var(--focus); box-shadow: 0 0 0 4px color-mix(in srgb, var(--focus) 22%, transparent); }
+    .otp:has(input[aria-invalid="true"]) .otp-cells span { border: 2px solid var(--redo); box-shadow: none; }
     .otp-status:empty { display: none; }
 
     /* Código de familia: cuadros normales */
-    .code-slots { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--space-2); width: 100%; }
-    .code-slots span { display: grid; place-items: center; height: 64px; border-radius: var(--radius-md); border: 1.5px solid var(--input-border); background: var(--surface); font: 800 1.75rem/1 var(--font-display); }
-    .code-slots span.is-next { border: 2px solid var(--focus); }
-    .code-slots span.is-filled { background: var(--action); border-color: transparent; color: var(--on-action); animation: egg-pop 300ms var(--ease-spring); }
     .code-msg { min-height: 20px; }
     .keypad { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); width: 100%; }
     .key { --layer: transparent; display: grid; place-items: center; height: 60px; border: 0; border-radius: var(--radius-lg); background: var(--surface); color: var(--text);
@@ -128,6 +126,7 @@
     .bird-pair { display: flex; align-items: flex-end; gap: var(--space-2); }
     @media (prefers-reduced-motion: reduce) {
       .ob, .otp-cells span.is-filled, .code-slots span.is-filled { animation: none !important; }
+      .otp-cells span, .code-slots span { transition: none; }
     }
 </style>
 </head>

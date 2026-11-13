@@ -1,0 +1,87 @@
+/* The kid's screens (Open Design «Inicio del hijo», system 1.3.0, decision 37): app.kid, app.hen, app.streak, and the
+   bar on app.prizes. Loaded after tokens.css and, on the kid's own screens, cs.css. The bar block needs only the tokens,
+   so app.prizes (still on _app.css) can carry it too. */
+
+/* ---------- the floating bar, with the nest «¡Lo hice!» in the middle (component.tabbarKid) ---------- */
+.kbar { position: fixed; left: 12px; right: 12px; bottom: 30px; z-index: 20; height: 68px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); align-items: center; padding: 0 4px; background: var(--surface); border-radius: 999px; box-shadow: var(--shadow-2); }
+.kbar[hidden] { display: none; }
+.kbar .bi { position: relative; display: grid; justify-items: center; align-content: center; gap: 2px; min-height: 56px; padding: 0; border: 0; background: transparent; color: var(--text-soft); font: inherit; cursor: pointer; transition: transform var(--dur-fast) var(--ease-standard); }
+.kbar .bi:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 16px; }
+.kbar .bi:active { transform: scale(.94); }
+.kbar .bi-ic { display: grid; place-items: center; width: 52px; height: 30px; }
+.kbar .bi-ic svg { width: 24px; height: 24px; }
+.kbar .bi-t { font: 700 .75rem/1.2 var(--font-text); white-space: nowrap; }
+.kbar .bi[aria-current=page] { color: var(--text); margin-top: 8px; }
+.kbar .bi[aria-current=page] .bi-t::after { content: ""; display: block; width: 5px; height: 5px; margin: 3px auto 0; border-radius: 50%; background: currentColor; }
+.kbar .bi-nest { align-self: end; padding-bottom: 8px; }
+.kbar .bi-nest .bi-t { color: var(--text); margin-top: 4px; }
+.nest-btn { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 72px; height: 72px; margin-top: -40px; padding-bottom: 14px; box-sizing: border-box; border-radius: 50%; background: var(--action); box-shadow: var(--shadow-2), 0 0 0 5px var(--bg); transition: transform var(--dur-fast) var(--ease-standard), background var(--dur-base); }
+.nest-btn img { display: block; image-rendering: auto; }
+.nest-egg { margin-bottom: -10px; position: relative; z-index: 0; }
+.nest-btn img:last-child { position: relative; z-index: 1; }
+.kbar .bi-nest:active .nest-btn { transform: scale(.92); }
+.kbar .bi-nest.is-done .nest-btn { background: var(--secondary); padding-bottom: 22px; }
+.kbar .bi-nest.is-done .nest-egg { display: none; }
+.kbar .bi-nest.is-done .bi-t { color: var(--text-soft); }
+.kbar .badge { position: absolute; top: -40px; right: 4px; min-width: 20px; height: 20px; padding: 0 5px; box-sizing: border-box; border-radius: 10px; background: var(--text); color: var(--bg); font: 800 .75rem/20px var(--font-text); text-align: center; }
+.kbar .badge:empty { display: none; }
+body:has(.kbar:not([hidden])) .app { padding-bottom: 122px; }   /* app.prizes, on _app.css */
+body:has(.kbar:not([hidden])) .toast { bottom: 116px; }
+
+/* ---------- the kid's own screens ---------- */
+.kv { min-height: 100vh; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; padding: 67px 20px 40px; color: var(--text); font: var(--type-body); }
+body:has(.kbar:not([hidden])) .kv { padding-bottom: 122px; }
+.kv p, .kv h1, .kv h2, .kv h3 { margin: 0; }
+.k-hdr { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.k-hdr > div { display: grid; gap: 2px; min-width: 0; }
+.k-back { flex: none; }
+.kick { font: var(--type-label); color: var(--text-soft); }
+.hi { font: var(--type-title-1); letter-spacing: var(--tracking-title-1); }
+.muted { color: var(--text-soft); }
+.k-sec { margin-top: 6px; font: var(--type-label); color: var(--text-soft); }
+.stack { display: grid; gap: 10px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.egg-pill > span { display: inline; }
+
+/* the hen in her straw nest, big and centered */
+.hero-k { flex: 1 0 auto; min-height: 176px; display: grid; place-items: center; position: relative; }
+.hero-k::before { content: ""; position: absolute; width: 300px; height: 300px; left: 50%; top: 50%; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle closest-side, var(--glow), transparent 70%); pointer-events: none; }
+.hero-k > * { position: relative; }
+.hero-k .hen-crop img[data-mood=sleep] { opacity: .92; }
+.hop { animation: hop var(--dur-celebrate, 600ms) var(--ease-standard) 1; }
+@keyframes hop { 0%, 100% { transform: translateY(0); } 25% { transform: translateY(2px) scaleY(.96); } 55% { transform: translateY(-14px); } 80% { transform: translateY(1px) scaleY(.97); } }
+
+/* the day: one egg per chore, laid when it is marked */
+.day { display: grid; gap: 6px; }
+.laid { display: flex; justify-content: center; gap: 12px; }
+.laid img { transition: opacity var(--dur-base) var(--ease-standard), filter var(--dur-base) var(--ease-standard); }
+.laid img.ghost { opacity: .28; filter: grayscale(1); }
+.cap { text-align: center; font: var(--type-body-strong); }
+.task-end .btn { white-space: nowrap; }
+.task-meta .praise { font: var(--type-label); font-weight: 500; color: var(--text-soft); }
+
+/* the sheet behind the nest: what is left to mark */
+.scrim { position: fixed; inset: 0; z-index: 30; background: var(--scrim, rgba(0,0,0,.5)); }
+.ksheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 31; display: grid; gap: 14px; padding: 12px 20px 42px; background: var(--surface); border-radius: 32px 32px 0 0; box-shadow: var(--shadow-2); }
+.ksheet.is-entering { animation: sheetin 380ms var(--ease-spring) 1; }
+@keyframes sheetin { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.ksheet-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.ksheet-head h2 { font: var(--type-title-2); }
+.empty-k { display: grid; justify-items: center; gap: 8px; padding: 12px 0; text-align: center; color: var(--text-soft); }
+.empty-k b { color: var(--text); font: var(--type-body-strong); }
+.ktoast { position: fixed; left: 16px; right: 16px; bottom: 116px; z-index: 40; }
+.ktoast .toast[hidden] { display: none; }
+
+/* «Mi gallina» and «Racha» */
+.big-hen { display: grid; justify-items: center; align-content: center; gap: 4px; padding: 8px 0; }
+.big-hen b { font: var(--type-title-2); }
+.card-k { display: grid; gap: 10px; padding: 16px; background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-1); }
+.card-k p { color: var(--text-soft); }
+.stages { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.stage-k { display: grid; justify-items: center; gap: 6px; padding: 12px 4px 10px; background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-1); text-align: center; }
+.stage-k span { font: var(--type-label); font-weight: 600; }
+.stage-k small { font: var(--type-caption); color: var(--text-soft); }
+.stage-k.is-now { outline: 2px solid var(--text); outline-offset: -2px; }
+.stage-k.is-next img { opacity: .35; filter: grayscale(1); }
+
+@media (prefers-reduced-motion: reduce) { .hop, .ksheet.is-entering { animation: none; } .nest-btn, .laid img, .kbar .bi { transition: none; } }

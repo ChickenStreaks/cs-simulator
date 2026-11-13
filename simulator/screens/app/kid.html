@@ -4,31 +4,41 @@
 <meta charset="utf-8">
 <script src="/simulator/sim.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Hoy · ChickenStreaks</title>
+<title>Inicio · ChickenStreaks</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/simulator/screens/tokens.css">
-<link rel="stylesheet" href="_app.css">
+<link rel="stylesheet" href="../cs.css">
+<link rel="stylesheet" href="_kid.css">
 </head>
 <body>
-<main class="app" data-od-id="kid">
-  <header class="top">
-    <button type="button" class="back" data-od-id="kid-back" aria-label="Regresar" hidden>←</button>
-    <div style="flex:1"><h1 data-od-id="kid-hello"></h1><small data-od-id="kid-sub"></small></div>
-    <span class="pill" data-od-id="kid-eggs"><i class="egg"></i><b></b></span>
-  </header>
-  <section class="card hero" data-od-id="kid-hero">
-    <div class="hen" data-od-id="kid-hen" data-img="../img/gallina.png"></div>
-    <div data-od-id="kid-streak"></div>
-  </section>
-  <section class="card" data-od-id="kid-forgive" hidden></section>
-  <p class="section" data-od-id="kid-for-adult" hidden>Sin teléfono: márcalas tú</p>
-  <div data-od-id="kid-chores" style="display:flex;flex-direction:column;gap:8px"></div>
-  <button type="button" class="btn soft wide" data-od-id="kid-prizes" hidden>Ver sus premios</button>
+<!-- app.kid · Open Design «Inicio del hijo» (option 1, «La gallina al centro»). The kid sees it with the bar; an adult
+     sees a kid's day from Hoy, with a back arrow, the streak and a way to forgive a missed day (logic/family.js). -->
+<main class="kv" data-od-id="kid">
+  <div class="k-hdr"><button type="button" class="icon-btn icon-btn--plain k-back" data-od-id="kid-back" aria-label="Regresar" hidden><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div style="flex:1"><p class="kick" data-od-id="kid-sub"></p><h1 class="hi" data-od-id="kid-hello"></h1></div><span class="egg-pill" data-od-id="kid-eggs"><img class="px" src="../img/pixel/huevo.png" width="12" height="15" alt=""><b></b></span></div>
+  <div class="hero-k" data-od-id="kid-hero"><div class="roost" style="--s:5"><img class="px" src="../img/pixel/nido-heno.png" width="150" height="55" alt=""><span class="hen-crop"><img class="px" data-od-id="kid-hen" src="../img/pixel/pollito-contenta.png" width="160" height="160" alt=""></span><img class="px" src="../img/pixel/nido-heno-frente.png" width="150" height="55" alt=""></div></div>
+  <div class="day"><div class="laid" data-od-id="kid-laid" aria-hidden="true"></div><p class="cap" data-od-id="kid-day" aria-live="polite"></p></div>
+  <section class="nest-card" data-od-id="kid-streak-card" hidden><div class="streak" data-od-id="kid-streak"></div></section>
+  <section class="card-k" data-od-id="kid-forgive" hidden></section>
+  <p class="k-sec" data-od-id="kid-for-adult" hidden>Sin teléfono: márcalas tú</p>
+  <div class="stack" data-od-id="kid-chores"></div>
+  <button type="button" class="btn btn--tonal btn--block" data-od-id="kid-prizes" hidden>Ver sus premios</button>
 </main>
-<div class="toast" data-od-id="kid-toast" role="status" hidden></div>
-<nav class="tabs" data-od-id="tabs" aria-label="Secciones">
-  <button type="button" data-od-id="tab-kid" data-go="app.kid"><span aria-hidden="true">🐔</span>Hoy</button>
-  <button type="button" data-od-id="tab-prizes" data-go="app.prizes"><span aria-hidden="true">🎁</span>Premios</button>
+<div class="scrim" data-od-id="kid-scrim" hidden></div>
+<section class="ksheet" data-od-id="kid-sheet" role="dialog" aria-modal="true" aria-labelledby="kid-sheet-title" hidden>
+  <span class="sheet-grip" aria-hidden="true"></span>
+  <div class="ksheet-head"><h2 id="kid-sheet-title">¿Qué hiciste?</h2><button type="button" class="icon-btn icon-btn--plain" data-od-id="kid-sheet-close" aria-label="Cerrar"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="stack" data-od-id="kid-sheet-list"></div>
+</section>
+<div class="ktoast"><div class="toast" data-od-id="kid-toast" role="status" hidden></div></div>
+<!-- the hen's art, stage × mood (gallina R2, R5, R7); logic/family.js drawHen() picks one -->
+<template data-od-id="hen-art"><img data-stage="pollito" data-mood="happy" src="../img/pixel/pollito-contenta.png" alt=""><img data-stage="pollito" data-mood="sleep" src="../img/pixel/pollito-dormida.png" alt=""><img data-stage="pollito" data-mood="party" src="../img/pixel/pollito-festejando.png" alt=""><img data-stage="pollita" data-mood="happy" src="../img/pixel/pollita-contenta.png" alt=""><img data-stage="pollita" data-mood="sleep" src="../img/pixel/pollita-dormida.png" alt=""><img data-stage="pollita" data-mood="party" src="../img/pixel/pollita-festejando.png" alt=""><img data-stage="gallina" data-mood="happy" src="../img/pixel/gallina-contenta.png" alt=""><img data-stage="gallina" data-mood="sleep" src="../img/pixel/gallina-dormida.png" alt=""><img data-stage="gallina" data-mood="party" src="../img/pixel/gallina-festejando.png" alt=""><img data-stage="dorada" data-mood="happy" src="../img/pixel/gallina-dorada-contenta.png" alt=""><img data-stage="dorada" data-mood="sleep" src="../img/pixel/gallina-dorada-dormida.png" alt=""><img data-stage="dorada" data-mood="party" src="../img/pixel/gallina-dorada-festejando.png" alt=""></template>
+<!-- the kid's bar (Open Design decision 37): the nest in the middle is «¡Lo hice!»; logic/family.js kidBar() -->
+<nav class="kbar" data-od-id="tabs" aria-label="Principal" hidden>
+  <button type="button" class="bi" data-od-id="tab-kid" data-go="app.kid"><span class="bi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5L12 4l8 6.5V20H4z"/><path d="M10 20v-5h4v5"/></svg></span><span class="bi-t">Inicio</span></button>
+  <button type="button" class="bi" data-od-id="tab-hen" data-go="app.hen"><span class="bi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c-3.6 0-6.5 5.2-6.5 10A6.5 6.5 0 0 0 12 19.5 6.5 6.5 0 0 0 18.5 13C18.5 8.2 15.6 3 12 3z"/></svg></span><span class="bi-t">Mi gallina</span></button>
+  <button type="button" class="bi bi-nest" data-od-id="tab-nest" aria-haspopup="dialog"><span class="nest-btn"><img class="nest-egg" src="../img/pixel/huevo.png" width="20" height="25" alt=""><img src="../img/pixel/nido-heno.png" width="60" height="22" alt=""></span><span class="badge" data-od-id="tab-nest-badge"></span><span class="bi-t" data-od-id="tab-nest-label">¡Lo hice!</span></button>
+  <button type="button" class="bi" data-od-id="tab-prizes" data-go="app.prizes"><span class="bi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M5 12v8h14v-8M12 8v12"/><path d="M12 8c-2-4-6-4-6-1.5S9 8 12 8zM12 8c2-4 6-4 6-1.5S15 8 12 8z"/></svg></span><span class="bi-t">Premios</span></button>
+  <button type="button" class="bi" data-od-id="tab-streak" data-go="app.streak"><span class="bi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21c-4 0-7-2.7-7-6.5 0-3 2-5 3.5-6.5.3 2 1.5 3 2.5 3-.5-3 1-6 4-8 0 3 2 4.5 3.3 6.3A7 7 0 0 1 19 14.5C19 18.3 16 21 12 21z"/></svg></span><span class="bi-t">Racha</span></button>
 </nav>
 </body>
 </html>

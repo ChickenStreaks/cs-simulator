@@ -70,8 +70,8 @@ test('the clock approves a mark nobody approved in 24 hours (tareas R10)', async
 test('a missed day: the adult forgives it within 48 hours and the streak comes back (rachas R7, R10)', async ({ page }) => {
   await openShell(page);
   await page.evaluate(() => { WB.reset('family-missed'); WB.viewAs.set('p-sofia'); });
-  await open(page, 'app.kid');
-  await waitHere(page, 'app.kid');
+  await open(page, 'app.streak');
+  await waitHere(page, 'app.streak');
   await expect(screen(page).locator('[data-od-id="kid-restart"]')).toContainText('¡Empecemos de nuevo!');
   await page.evaluate(() => WB.viewAs.set('p-mama'));
   await open(page, 'app.kid', { kid: 'p-sofia' });
@@ -133,5 +133,32 @@ test('«Theme» in the bar turns the shell and the screen dark and back', async 
   await expect(screen(page).locator('html')).toHaveAttribute('data-theme', 'dark');
   await page.locator('[data-testid="sh-theme-light"]').click();
   await expect(screen(page).locator('html')).toHaveAttribute('data-theme', 'light');
+  noErrors(page);
+});
+
+test('the kid\'s bar: the nest opens what is left, a mark from there waits, and the tabs go to Mi gallina and Racha (DECISIONS F11)', async ({ page }) => {
+  await openShell(page);
+  await page.evaluate(() => { WB.reset('shell-base'); WB.viewAs.set('p-sofia'); });
+  await open(page, 'app.kid');
+  await waitHere(page, 'app.kid', 'waiting');
+  const s = screen(page);
+  await expect(s.locator('[data-od-id="tabs"]')).toBeVisible();
+  await expect(s.locator('[data-od-id="tab-nest-badge"]')).toHaveText('1');
+  await s.locator('[data-od-id="tab-nest"]').click();
+  await expect(s.locator('[data-od-id="kid-sheet"]')).toBeVisible();
+  await s.locator('[data-od-id="sheet-mark-ch-sofia-juguetes"]').click();
+  await expect(s.locator('[data-od-id="kid-chore-ch-sofia-juguetes"]')).toContainText('En espera');
+  await expect(s.locator('[data-od-id="tab-nest-label"]')).toHaveText('Todo listo');
+  await expect(s.locator('[data-od-id="kid-sheet-list"]')).toContainText('¡Todo listo por hoy!');
+  await s.locator('[data-od-id="kid-sheet-close"]').click();
+  await s.locator('[data-od-id="tab-hen"]').click();
+  await waitHere(page, 'app.hen', 'default');
+  await expect(screen(page).locator('[data-od-id="hen-step"]')).toHaveText(/Etapa \d de 4/);
+  await screen(page).locator('[data-od-id="tab-streak"]').click();
+  await waitHere(page, 'app.streak', 'default');
+  await expect(screen(page).locator('[data-od-id="kid-streak"]')).toBeVisible();
+  await page.evaluate(() => WB.viewAs.set('p-mama'));
+  await open(page, 'app.hen');
+  await waitHere(page, 'app.hen', 'no-access');
   noErrors(page);
 });

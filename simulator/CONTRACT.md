@@ -57,6 +57,8 @@ elements by them, so a designer's screen can replace the HTML without touching t
   changed copy of the world), never writing the store.
 - `as` (optional): whose eyes the gallery shows the state through, a person of `shell-base`. Without it: the kid in
   `params` when that kid has a phone, else Mamá.
+- `for` (optional): the gallery section, `"anyone"` (before anyone signs in) or `"kid"`. Without it: the role of
+  the person it is seen through (`as`, above), so Parent or Kid.
 
 ## 4. Scenarios — `scenarios/*.json`
 

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<script src="/simulator/sim.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Racha · ChickenStreaks</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/simulator/screens/tokens.css">
+<link rel="stylesheet" href="../cs.css">
+<link rel="stylesheet" href="_kid.css">
+</head>
+<body>
+<!-- app.streak · «Racha» from Open Design «Inicio del hijo»: the streak, the wildcards and what a pause means (rachas R5,
+     R10, R12). Provisional: the blueprint has no such screen (DECISIONS F11). -->
+<main class="kv" data-od-id="streak">
+  <h1 class="hi">Mi racha</h1>
+  <section class="nest-card"><div class="roost" style="--s:3"><img class="px" src="../img/pixel/nido-heno.png" width="90" height="33" alt=""><span class="hen-crop"><img class="px" data-od-id="streak-hen" src="../img/pixel/pollito-contenta.png" width="96" height="96" alt=""></span><img class="px" src="../img/pixel/nido-heno-frente.png" width="90" height="33" alt=""></div><div class="streak" data-od-id="kid-streak"></div></section>
+  <div class="card-k"><b>¿Qué es un comodín?</b><p>Es un cojín de paja. Si un día no alcanzas, el comodín cuida tu racha. Ganas uno cada 7 días.</p></div>
+  <div class="card-k"><b>Si un día se pausa</b><p>No pasa nada: tu mejor racha se guarda y mañana empieza otra.</p></div>
+</main>
+<!-- the hen's art, stage × mood (gallina R2, R5, R7); logic/family.js drawHen() picks one -->
+<template data-od-id="hen-art"><img data-stage="pollito" data-mood="happy" src="../img/pixel/pollito-contenta.png" alt=""><img data-stage="pollito" data-mood="sleep" src="../img/pixel/pollito-dormida.png" alt=""><img data-stage="pollito" data-mood="party" src="../img/pixel/pollito-festejando.png" alt=""><img data-stage="pollita" data-mood="happy" src="../img/pixel/pollita-contenta.png" alt=""><img data-stage="pollita" data-mood="sleep" src="../img/pixel/pollita-dormida.png" alt=""><img data-stage="pollita" data-mood="party" src="../img/pixel/pollita-festejando.png" alt=""><img data-stage="gallina" data-mood="happy" src="../img/pixel/gallina-contenta.png" alt=""><img data-stage="gallina" data-mood="sleep" src="../img/pixel/gallina-dormida.png" alt=""><img data-stage="gallina" data-mood="party" src="../img/pixel/gallina-festejando.png" alt=""><img data-stage="dorada" data-mood="happy" src="../img/pixel/gallina-dorada-contenta.png" alt=""><img data-stage="dorada" data-mood="sleep" src="../img/pixel/gallina-dorada-dormida.png" alt=""><img data-stage="dorada" data-mood="party" src="../img/pixel/gallina-dorada-festejando.png" alt=""></template>
+<!-- the kid's bar (Open Design decision 37): the nest in the middle is «¡Lo hice!»; logic/family.js kidBar() -->
+<nav class="kbar" data-od-id="tabs" aria-label="Principal" hidden>
+  <button type="button" class="bi" data-od-id="tab-kid" data-go="app.kid"><span class="bi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5L12 4l8 6.5V20H4z"/><path d="M10 20v-5h4v5"/></svg></span><span class="bi-t">Inicio</span></button>
+  <button type="button" class="bi" data-od-id="tab-hen" data-go="app.hen"><span class="bi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c-3.6 0-6.5 5.2-6.5 10A6.5 6.5 0 0 0 12 19.5 6.5 6.5 0 0 0 18.5 13C18.5 8.2 15.6 3 12 3z"/></svg></span><span class="bi-t">Mi gallina</span></button>
+  <button type="button" class="bi bi-nest" data-od-id="tab-nest" aria-haspopup="dialog"><span class="nest-btn"><img class="nest-egg" src="../img/pixel/huevo.png" width="20" height="25" alt=""><img src="../img/pixel/nido-heno.png" width="60" height="22" alt=""></span><span class="badge" data-od-id="tab-nest-badge"></span><span class="bi-t" data-od-id="tab-nest-label">¡Lo hice!</span></button>
+  <button type="button" class="bi" data-od-id="tab-prizes" data-go="app.prizes"><span class="bi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M5 12v8h14v-8M12 8v12"/><path d="M12 8c-2-4-6-4-6-1.5S9 8 12 8zM12 8c2-4 6-4 6-1.5S15 8 12 8z"/></svg></span><span class="bi-t">Premios</span></button>
+  <button type="button" class="bi" data-od-id="tab-streak" data-go="app.streak"><span class="bi-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21c-4 0-7-2.7-7-6.5 0-3 2-5 3.5-6.5.3 2 1.5 3 2.5 3-.5-3 1-6 4-8 0 3 2 4.5 3.3 6.3A7 7 0 0 1 19 14.5C19 18.3 16 21 12 21z"/></svg></span><span class="bi-t">Racha</span></button>
+</nav>
+</body>
+</html>

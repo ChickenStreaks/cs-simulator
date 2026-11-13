@@ -4,14 +4,14 @@
   "screens": [
     { "id": "app.splash", "title": "Splash", "area": "app", "design": "draft",
       "file": "simulator/screens/app/splash.html", "flow": "simulator/flows/first-open.md",
-      "states": [ { "id": "default", "title": "El huevo eclosiona en la gallina dorada" } ] },
+      "states": [ { "id": "default", "for": "anyone", "title": "El huevo eclosiona en la gallina dorada" } ] },
     { "id": "app.onboarding", "title": "Bienvenida", "area": "app", "design": "draft",
       "file": "simulator/screens/app/onboarding.html", "flow": "simulator/flows/first-open.md",
-      "states": [ { "id": "slide-1", "title": "ChickenStreaks" }, { "id": "slide-2", "title": "Tareas", "drive": true },
-                  { "id": "slide-3", "title": "Su gallina", "drive": true }, { "id": "slide-4", "title": "Rachas sin presión", "drive": true } ] },
+      "states": [ { "id": "slide-1", "for": "anyone", "title": "ChickenStreaks" }, { "id": "slide-2", "for": "anyone", "title": "Tareas", "drive": true },
+                  { "id": "slide-3", "for": "anyone", "title": "Su gallina", "drive": true }, { "id": "slide-4", "for": "anyone", "title": "Rachas sin presión", "drive": true } ] },
     { "id": "app.access", "title": "Acceso", "area": "app", "design": "draft",
       "file": "simulator/screens/app/access.html", "flow": "simulator/flows/access.md",
-      "states": [ { "id": "rol", "title": "Quién usa el teléfono" },
+      "states": [ { "id": "rol", "for": "anyone", "title": "Quién usa el teléfono" },
                   { "id": "correo", "title": "Adulto · Crear cuenta", "drive": true },
                   { "id": "verificar", "title": "Adulto · Código del correo", "drive": true },
                   { "id": "adulto", "title": "Adulto · Permiso", "drive": true },
@@ -23,8 +23,8 @@
                   { "id": "rc-codigo", "title": "Adulto · Código de recuperación", "drive": true },
                   { "id": "nueva", "title": "Adulto · Contraseña nueva", "drive": true },
                   { "id": "renovada", "title": "Adulto · Contraseña lista", "drive": true },
-                  { "id": "codigo", "title": "Hijo · Código", "drive": true },
-                  { "id": "sincodigo", "title": "Hijo · Sin código", "drive": true },
-                  { "id": "hola", "title": "Hijo · Saludo", "drive": true } ] }
+                  { "id": "codigo", "for": "kid", "title": "Hijo · Código", "drive": true },
+                  { "id": "sincodigo", "for": "kid", "title": "Hijo · Sin código", "drive": true },
+                  { "id": "hola", "for": "kid", "title": "Hijo · Saludo", "drive": true } ] }
   ]
 }

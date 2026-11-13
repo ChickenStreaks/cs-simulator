@@ -20,8 +20,10 @@ body.sh-page{overflow:auto;min-height:100%}
 /* ---------- the gallery: every screen and state, small and live ---------- */
 .sh-reset.gal-app{width:auto;padding:0 16px;white-space:nowrap}   /* keeps its words on a phone (Reset's own rule drops them) */
 .gallery{max-width:1400px;margin:0 auto;padding:calc(var(--sh-bar-h) + 28px) 20px 64px;--gw:390px;--gh:844px;--gs:.4}
-.gal-group + .gal-group{margin-top:44px}
-.gal-group h2{margin:0 0 18px;font:700 26px/1.15 var(--sh-display);letter-spacing:-.02em;color:var(--cs-text)}
+.gal-section + .gal-section{margin-top:64px;padding-top:36px;border-top:1px solid var(--cs-line)}
+.gal-section h2{margin:0 0 24px;font:800 34px/1.1 var(--sh-display);letter-spacing:-.02em;color:var(--cs-text)}
+.gal-group + .gal-group{margin-top:40px}
+.gal-group h3{margin:0 0 16px;font:700 20px/1.2 var(--sh-display);letter-spacing:-.01em;color:var(--cs-text-soft)}
 .gal-grid{display:flex;flex-wrap:wrap;gap:26px 20px}
 .gal-item{display:flex;flex-direction:column;gap:3px;width:calc(var(--gw) * var(--gs));text-decoration:none;color:var(--cs-text)}
 .gal-phone{position:relative;display:block;width:calc(var(--gw) * var(--gs));height:calc(var(--gh) * var(--gs));margin-bottom:8px;overflow:hidden;

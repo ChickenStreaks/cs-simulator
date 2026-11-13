@@ -4,13 +4,14 @@ actor: adult (Papá, Mamá) and kid
 trigger: a new day with chores
 status: draft
 order: 2
-last checked against the simulator: 03f6c59
+last checked against the simulator: 2ad80d2
 ---
 
 # The daily loop — assign, mark, approve
 
 An adult gives a kid chores; the kid marks them done; an adult approves; the kid earns eggs, the streak counts the day
-and the hen grows. Screens: `app.today`, `app.approvals`, `app.chores`, `app.chore-new`, `app.kid`. Prizes are
+and the hen grows. Screens: `app.today`, `app.approvals`, `app.chores`, `app.chore-new`, `app.kid`, and the kid's `app.hen` and
+`app.streak` (provisional, DECISIONS F11). Prizes are
 [prizes.md](prizes.md).
 
 ## Steps
@@ -24,8 +25,11 @@ and the hen grows. Screens: `app.today`, `app.approvals`, `app.chores`, `app.cho
    fácil 5 · media 10 · difícil 20, huevos R2), name, days, eggs 1–50 (a written chore starts at 10), «Se aprueba sola»
    (tareas R10). Only adults (tareas R1). A risky word shows «¿Es seguro para su edad? Considera acompañarlo» and never
    blocks (tareas R4, state `safety`). The chore counts from the day it is created.
-3. **The kid marks it** — `app.kid` on the kid's phone. Today's chores: «¡Lo hice!» → «⏳ En espera» (tareas R8; state
-   `waiting`). A chore that approves itself goes straight to «✓ Aprobada». The day already counts for the streak once
+3. **The kid marks it** — `app.kid` on the kid's phone (Open Design's «Inicio del hijo»): the date, «Hola, Sofi» and the
+   eggs; the hen big in her straw nest; one egg per chore of the day, laid when it is marked («1 de 3 tareas hoy»); then
+   the chores, what is left first. «¡Lo hice!» on a chore, or the nest in the middle of the bar, which opens «¿Qué
+   hiciste?» with what is left and a count on the nest («Todo listo» when nothing is left; from another tab it opens
+   Inicio with the sheet up). «¡Lo hice!» → «En espera» (tareas R8; state `waiting`); the hen hops. A chore that approves itself goes straight to «✓ Aprobada». The day already counts for the streak once
    every chore is marked, approved or not (rachas R1, R2).
 4. **An adult marks for a kid with no phone** — `app.kid?kid=p-emi` as an adult: «Marcar hecha», approved at once
    (tareas R6, familia R10).
@@ -36,14 +40,17 @@ and the hen grows. Screens: `app.today`, `app.approvals`, `app.chores`, `app.cho
    punishment; the day is open again until it is marked.
 7. **Nobody approved** — a mark pending 24 hours approves itself when the clock passes it: «Se aprobó sola» (tareas
    R10). From the console: a mark pending 23 hours, then `WB.clock.advance('1h')` (tests/family.spec.mjs).
-8. **The streak and the hen** — `app.kid`: the age decides what leads (rachas R12): 4–6 no number («¡Tu gallina está
+8. **The streak and the hen** — the kid's bar: Inicio · Mi gallina · ¡Lo hice! · Premios · Racha (DECISIONS F11).
+   «Racha» (`app.streak`) and, for an adult, the kid's day in `app.kid`: the age decides what leads (rachas R12): 4–6 no number («¡Tu gallina está
    contenta!»), 7–9 the week («5 de 7 días») with the streak second, 10+ the streak number with wildcards and the best.
    A wildcard is earned every 7 days, at most 2, and saves a missed day by itself (rachas R5; the week bar shows it
    striped). Milestones 7, 14, 30 add a one-off bonus (rachas R11). The hen's stage follows the total of approved
-   chores and never goes back (gallina R2, R3); with no marks in 3 days she sleeps (gallina R5).
+   chores and never goes back (gallina R2, R3); with no marks in 3 days she sleeps (gallina R5); with the day all marked
+   she celebrates (gallina R7). «Mi gallina» (`app.hen`): her stage («Etapa 2 de 4»), the approved chores to the next one
+   and the four stages; the bar counts chores, not eggs (gallina R2 wins over Open Design's «60 huevos»).
 9. **A missed day** — with no wildcard, an adult opening `app.kid` sees «Sofía no completó el martes» and «Perdonar el
    día» within 48 hours (rachas R7; state `missed`). Not forgiven, the streak starts over gently: «¡Empecemos de nuevo!
-   Tu récord fue N días», no zero in red (rachas R10, R13).
+   Tu récord fue N días» in «Racha», no zero in red (rachas R10, R13).
 
 ## Failure cases
 
@@ -51,6 +58,7 @@ and the hen grows. Screens: `app.today`, `app.approvals`, `app.chores`, `app.cho
   papás» with «Ir a mi día» (state `no-access`).
 - **F-2** A kid opens another kid's day: «Este no es tu día» (state `no-access`).
 - **F-3** `app.kid` with an unknown kid: «No encontramos a este hijo» (state `not-found`).
+- **F-5** An adult opens «Mi gallina» or «Racha»: «Esto es de los hijos» with «Ir a Hoy» (state `no-access`).
 - **F-4** A day with no chores: «Hoy no hay tareas» — it neither counts nor breaks (rachas R3, state `rest`).
 
 ## Configurable settings

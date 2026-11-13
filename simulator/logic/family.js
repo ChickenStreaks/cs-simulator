@@ -34,7 +34,11 @@
     'app.kid·rest': { world: function (w) { w.chores.forEach(function (c) { c.kids = c.kids.filter(function (k) { return k !== 'p-emi'; }); }); w.chores = w.chores.filter(function (c) { return c.kids.length; }); } },
     'app.kid·no-access': { as: 'p-mateo' },
     'app.prizes·to-deliver': { world: function (w) { w.redemptions.push({ id: 'rd-preview', prize: 'pz-sofia-peli', kid: 'p-sofia', name: 'Elegir la película del viernes', price: 60, at: WB.clock.iso(), status: 'to-deliver' }); } },
-    'app.prizes·no-access': { as: 'p-mateo' }
+    'app.prizes·no-access': { as: 'p-mateo' },
+    'app.hen·default': { as: 'p-sofia' },
+    'app.streak·default': { as: 'p-sofia' },
+    'app.hen·no-access': { as: 'p-mama' },
+    'app.streak·no-access': { as: 'p-mama' }
   };
   ['app.today', 'app.approvals', 'app.chores', 'app.chore-new'].forEach(function (id) { PREVIEW[id + '·no-access'] = { as: 'p-sofia' }; });
   function approveAll(w) { w.marks.forEach(function (m) { if (m.status === 'pending') { m.status = 'approved'; m.approvedBy = 'p-papa'; m.approvedAt = WB.clock.iso(); m.eggs = 5; } }); }
@@ -265,17 +269,68 @@
   /* ==========================================================================
      app.kid — a kid's day: their phone, or an adult looking at it (and marking for a kid with no phone)
      ========================================================================== */
+  // the hen's mood (gallina R5: asleep after 3 days without a mark, never sad; R7: she celebrates a day done); her art
+  // is the screen's own (template hen-art)
+  function henArt(doc, st, mood) { return doc.querySelector('[data-od-id="hen-art"]').content.querySelector('[data-stage="' + st + '"][data-mood="' + mood + '"]').getAttribute('src'); }
+  function henMood(w, k, allDone) {
+    var last = w.marks.filter(function (m) { return m.kid === k.id; }).map(function (m) { return m.at; }).sort().pop();
+    return !last || WB.clock.now() - Date.parse(last) > 3 * 24 * HOUR ? 'sleep' : allDone ? 'party' : 'happy';
+  }
+  function drawHen(img, w, k, adult, allDone) {
+    var st = C.stage(w, k.id).stage, mood = henMood(w, k, allDone);
+    img.src = henArt(img.ownerDocument, st, mood);
+    img.setAttribute('data-stage', st); img.setAttribute('data-mood', mood);
+    img.alt = (adult ? 'Su ' : 'Tu ') + HEN[st].name + (mood === 'sleep' ? ', dormida' : mood === 'party' ? ', festejando' : ', contenta');
+  }
   function streakHtml(k, s, adult) {
     var tu = adult ? 'Su' : 'Tu';
-    var week = '<div class="week" data-od-id="kid-week" aria-label="Últimos 7 días">' + s.week.map(function (d) { return '<i data-s="' + d.status + '" title="' + WEEKDAY[C.weekday(d.day)] + '"></i>'; }).join('') + '</div>';
+    var week = '<div class="week" data-od-id="kid-week" aria-label="Últimos 7 días">' + s.week.map(function (d) {
+      var c = d.status === 'done' ? 'on' : d.status === 'forgiven' || d.status === 'saved' ? 'saved' : '';
+      return '<i class="' + c + '" data-s="' + d.status + '" title="' + WEEKDAY[C.weekday(d.day)] + '"></i>';
+    }).join('') + '</div>';
     var full = s.week.filter(function (d) { return ['done', 'forgiven', 'saved'].indexOf(d.status) >= 0; }).length;
-    var tokens = '<div class="soft" data-od-id="kid-tokens">🛡️ ' + s.wildcards + (s.wildcards === 1 ? ' comodín' : ' comodines') + ' · mejor racha ' + s.best + '</div>';
-    var restart = s.current === 0 && s.best > 0 ? '<div class="soft" data-od-id="kid-restart">¡Empecemos de nuevo! ' + tu + ' récord fue ' + s.best + ' días</div>' : '';   // rachas R10
+    var slots = ''; for (var i = 0; i < 2; i++) slots += i < s.wildcards ? '<img class="px" src="../img/pixel/cojin-heno.png" width="32" height="16" alt="">' : '<span class="wild-slot"></span>';
+    var tokens = '<span class="wildcards" data-od-id="kid-tokens">' + slots + s.wildcards + ' de 2 comodines</span><span class="streak-best">Mejor racha: ' + s.best + (s.best === 1 ? ' día' : ' días') + '</span>';
+    var restart = s.current === 0 && s.best > 0 ? '<span class="streak-best" data-od-id="kid-restart">¡Empecemos de nuevo! ' + tu + ' récord fue ' + s.best + ' días</span>' : '';   // rachas R10
     // rachas R12: the age decides what leads
-    if (k.ageRange === '4-6') return '<small class="soft">' + tu + ' semana</small><div class="display" style="font-size:20px;font-weight:700">¡' + tu + ' gallina está contenta!</div>' + week;
-    if (k.ageRange === '7-9') return '<small class="soft">' + tu + ' semana</small><div class="big" data-od-id="kid-week-count">' + full + ' <span>de 7 días</span></div>' + week + '<div class="soft">🔥 Racha de ' + s.current + ' días</div>' + restart;
-    return '<small class="soft">' + tu + ' racha</small><div class="big" data-od-id="kid-streak-count">' + s.current + ' <span>' + (s.current === 1 ? 'día' : 'días') + '</span></div>' + week + tokens + restart;
+    if (k.ageRange === '4-6') return '<span class="streak-cap">' + tu + ' semana</span><span class="streak-num" style="font-size:1.25rem">¡' + tu + ' gallina está contenta!</span>' + week;
+    if (k.ageRange === '7-9') return '<span class="streak-cap">' + tu + ' semana</span><span class="streak-num" data-od-id="kid-week-count">' + full + '<span class="streak-unit">de 7 días</span></span>' + week + '<span class="streak-best">Racha de ' + s.current + ' días</span>' + restart;
+    return '<span class="streak-cap">' + tu + ' racha</span><span class="streak-num" data-od-id="kid-streak-count">' + s.current + '<span class="streak-unit">' + (s.current === 1 ? 'día' : 'días') + '</span></span>' + week + tokens + restart;
   }
+  // a kid's own screens: only that kid (an adult has Hoy); null when the screen was replaced by a state
+  function kidOnly(doc, root) {
+    if (isAdult()) { WB.ui.stateScreen(q(doc, root), { kind: 'no-access', title: 'Esto es de los hijos', text: 'Aquí cada hijo ve lo suyo.', primary: { label: 'Ir a Hoy', go: 'app.today' } }); WB.setScreenState('no-access'); return null; }
+    return me();
+  }
+  // the kid's bar (Open Design decision 37, DECISIONS F11): four tabs and the nest, «¡Lo hice!» with what is left to mark
+  function kidBar(doc, active, k, show) {
+    var bar = q(doc, 'tabs'); if (!bar) return;
+    bar.hidden = !show; if (!show) return;
+    [].forEach.call(bar.querySelectorAll('[data-go]'), function (b) {
+      if (b.getAttribute('data-go') === active) b.setAttribute('aria-current', 'page');
+      b.onclick = function () { WB.go(b.getAttribute('data-go')); };
+    });
+    q(doc, 'tab-nest').onclick = function () { if (active === 'app.kid' && doc.defaultView.CSKidSheet) doc.defaultView.CSKidSheet(true); else WB.go('app.kid', { hice: 1 }); };
+    render(doc, function () {
+      var w = W(), t = today(), left = C.dueChores(w, k.id, t).filter(function (c) { return !C.markOf(w, k.id, c.id, t); }).length, nest = q(doc, 'tab-nest');
+      nest.classList.toggle('is-done', !left);
+      q(doc, 'tab-nest-label').textContent = left ? '¡Lo hice!' : 'Todo listo';
+      q(doc, 'tab-nest-badge').textContent = left || '';
+      nest.setAttribute('aria-label', left ? '¡Lo hice! ' + left + (left === 1 ? ' tarea' : ' tareas') + ' por marcar' : 'Todo listo, no quedan tareas');
+    });
+  }
+  function choreCard(w, k, c, t, adult, where) {
+    var m = C.markOf(w, k.id, c.id, t), redone = w.marks.some(function (x) { return x.kid === k.id && x.chore === c.id && x.day === t && x.status === 'redo'; });
+    var end = '', chips = '';
+    if (!m) end = '<button type="button" class="btn btn--sm' + (redone ? ' btn--tonal' : '') + '" data-od-id="' + where + '-mark-' + c.id + '" data-mark="' + c.id + '">' + (adult ? 'Marcar hecha' : redone ? '¡Ya quedó!' : '¡Lo hice!') + '</button>';
+    if (!m && redone) chips = '<span class="chip chip--redo">↻ Repítela</span>';
+    if (m && m.status === 'pending') { chips = '<span class="chip chip--wait">En espera</span>'; end = ''; }
+    if (m && m.status === 'approved') { end = '<span class="chip chip--ok">✓ Aprobada</span>'; chips = m.praise ? '<span class="praise">«' + esc(m.praise) + '» · ' + esc(who(m.approvedBy)) + '</span>' : ''; }
+    return '<article class="task" data-od-id="' + where + '-chore-' + c.id + '"><span class="task-icon" aria-hidden="true">' + (c.icon || '✨') + '</span>'
+      + '<div class="task-body"><span class="task-title">' + esc(c.name) + '</span><div class="task-meta"><span class="eggs"><img class="px" src="../img/pixel/huevo.png" width="12" height="15" alt="">+' + c.eggs + '</span>' + chips + '</div></div>'
+      + '<div class="task-end">' + end + '</div></article>';
+  }
+  var MONTH = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
   WB.wire('app.kid', function (WB, doc) {
     preview('app.kid');
     var k = kidOf(), adult = isAdult();
@@ -285,68 +340,113 @@
       else { WB.ui.stateScreen(q(doc, 'kid'), { kind: 'not-found', title: 'No encontramos a este hijo', text: 'Regresa a Hoy y elige a uno.', primary: { label: 'Ir a Hoy', go: 'app.today' } }); WB.setScreenState('not-found'); return; }
     }
     if (!adult && k.id !== me().id) { WB.ui.stateScreen(q(doc, 'kid'), { kind: 'no-access', title: 'Este no es tu día', text: 'Cada quien ve solo lo suyo.', primary: { label: 'Ir a mi día', go: 'app.kid' } }); WB.setScreenState('no-access'); return; }
-    tabs(doc, 'app.kid');
-    q(doc, 'tabs').hidden = adult;
+    kidBar(doc, 'app.kid', k, !adult);
     q(doc, 'kid-back').hidden = !adult; q(doc, 'kid-back').onclick = function () { WB.back('app.today'); };
     q(doc, 'kid-prizes').hidden = !adult; q(doc, 'kid-prizes').onclick = function () { WB.go('app.prizes', { kid: k.id }); };
+    q(doc, 'kid-streak-card').hidden = !adult;   // the kid has «Racha» in the bar
+    // the nest's sheet: what is left to mark
+    var sheet = q(doc, 'kid-sheet'), scrim = q(doc, 'kid-scrim'), still = WB.still || doc.defaultView.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function openSheet(on) {
+      sheet.hidden = scrim.hidden = !on;
+      sheet.classList.toggle('is-entering', on && !still);
+      if (on) (sheet.querySelector('[data-mark]') || q(doc, 'kid-sheet-close')).focus(); else q(doc, 'tab-nest').focus();
+    }
+    doc.defaultView.CSKidSheet = openSheet;
+    q(doc, 'kid-sheet-close').onclick = scrim.onclick = function () { openSheet(false); };
+    doc.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !sheet.hidden) openSheet(false); });
     render(doc, function () {
-      var w = W(), t = today(), due = C.dueChores(w, k.id, t), s = C.streak(w, k.id, t), e = C.eggs(w, k.id, t), st = C.stage(w, k.id);
+      var w = W(), t = today(), due = C.dueChores(w, k.id, t), s = C.streak(w, k.id, t), e = C.eggs(w, k.id, t);
+      var marked = due.filter(function (c) { return C.markOf(w, k.id, c.id, t); }), allDone = due.length && marked.length === due.length;
+      var d = new Date(t + 'T12:00:00');
+      q(doc, 'kid-sub').textContent = (WEEKDAY[C.weekday(t)] + ' ' + d.getDate() + ' de ' + MONTH[d.getMonth()]).replace(/^./, function (c) { return c.toUpperCase(); });
       q(doc, 'kid-hello').textContent = adult ? k.name : 'Hola, ' + (k.short || k.name);
-      q(doc, 'kid-sub').textContent = WEEKDAY[C.weekday(t)].replace(/^./, function (c) { return c.toUpperCase(); }) + ' · ' + (due.length ? due.length + (due.length === 1 ? ' tarea hoy' : ' tareas hoy') : 'hoy descansas');
       q(doc, 'kid-eggs').querySelector('b').textContent = e.balance;
       q(doc, 'kid-eggs').setAttribute('aria-label', e.balance + ' huevos');
-      // gallina R5: no marks in 3 days → asleep, never sad
-      var last = w.marks.filter(function (m) { return m.kid === k.id; }).map(function (m) { return m.at; }).sort().pop();
-      var asleep = !last || WB.clock.now() - Date.parse(last) > 3 * 24 * HOUR, hen = HEN[st.stage], henEl = q(doc, 'kid-hen');
-      henEl.setAttribute('data-stage', st.stage); henEl.setAttribute('data-mood', asleep ? 'sleep' : 'happy');
-      henEl.innerHTML = hen.img ? '<img src="' + esc(henEl.getAttribute('data-img')) + '" alt="' + esc((adult ? 'Su ' : 'Tu ') + hen.name + (asleep ? ', dormida' : ', contenta')) + '">' : '<span role="img" aria-label="' + esc((adult ? 'Su ' : 'Tu ') + hen.name) + '">' + hen.emoji + '</span>';
-      q(doc, 'kid-streak').innerHTML = streakHtml(k, s, adult);
+      drawHen(q(doc, 'kid-hen'), w, k, adult, allDone);
+      // one egg per chore of the day, laid when it is marked
+      q(doc, 'kid-laid').innerHTML = due.map(function (c, i) { return '<img class="px' + (i < marked.length ? '' : ' ghost') + '" src="../img/pixel/huevo.png" width="24" height="30" alt="">'; }).join('');
+      q(doc, 'kid-day').textContent = !due.length ? 'Hoy descansas' : allDone ? (adult ? '¡Hizo' : '¡Hiciste') + ' todas ' + (adult ? 'sus' : 'tus') + ' tareas de hoy!' : marked.length + ' de ' + due.length + (due.length === 1 ? ' tarea hoy' : ' tareas hoy');
+      if (adult) q(doc, 'kid-streak').innerHTML = streakHtml(k, s, adult);
       // rachas R7: an adult forgives a missed day of the last 48 hours (repair, R8, is not built yet: flows/daily-loop.md)
-      var miss = adult ? [C.addDays(t, -1), C.addDays(t, -2)].filter(function (d) { return C.canForgive(w, k.id, d, t); })[0] : null, fg = q(doc, 'kid-forgive');
+      var miss = adult ? [C.addDays(t, -1), C.addDays(t, -2)].filter(function (dd) { return C.canForgive(w, k.id, dd, t); })[0] : null, fg = q(doc, 'kid-forgive');
       fg.hidden = !miss;
       if (miss) {
-        fg.innerHTML = '<h3 style="font-size:17px">' + esc(k.name) + ' no completó el ' + WEEKDAY[C.weekday(miss)] + '</h3><p class="soft" style="font-size:13px">Puedes perdonar el día; su racha sigue como si lo hubiera cumplido.</p>'
-          + '<button type="button" class="btn" data-od-id="kid-forgive-yes">Perdonar el día</button>';
+        fg.innerHTML = '<b>' + esc(k.name) + ' no completó el ' + WEEKDAY[C.weekday(miss)] + '</b><p>Puedes perdonar el día; su racha sigue como si lo hubiera cumplido.</p>'
+          + '<button type="button" class="btn btn--block" data-od-id="kid-forgive-yes">Perdonar el día</button>';
         q(doc, 'kid-forgive-yes').onclick = function () {
           WB.state.update(function (w2) { w2.forgives.push({ id: newId('fg'), kid: k.id, day: miss, by: me().id, at: WB.clock.iso() }); }, 'perdonó el ' + WEEKDAY[C.weekday(miss)] + ' de ' + k.name);
           toast(doc, 'kid-toast', 'Día perdonado. La racha sigue.');
         };
       }
       q(doc, 'kid-for-adult').hidden = !(adult && !k.paired);
-      var waiting = false;
-      q(doc, 'kid-chores').innerHTML = due.map(function (c) {
-        var m = C.markOf(w, k.id, c.id, t), redone = w.marks.some(function (x) { return x.kid === k.id && x.chore === c.id && x.day === t && x.status === 'redo'; });
-        var right = '', chips = '';
-        if (!m) right = '<button type="button" class="btn' + (redone ? ' soft' : '') + '" data-od-id="kid-mark-' + c.id + '" data-mark="' + c.id + '">' + (adult ? 'Marcar hecha' : redone ? '¡Ya quedó!' : '¡Lo hice!') + '</button>';
-        if (!m && redone) chips = '<span class="chip redo">↻ Repítela</span>';
-        if (m && m.status === 'pending') { waiting = true; chips = '<span class="chip wait">⏳ En espera</span>'; }
-        if (m && m.status === 'approved') { chips = '<span class="chip ok">✓ Aprobada</span>' + (m.praise ? '<span>«' + esc(m.praise) + '» · ' + esc(who(m.approvedBy)) + '</span>' : ''); right = '<span class="done" aria-label="Hecha">✓</span>'; }
-        return '<div class="row" data-od-id="kid-chore-' + c.id + '"><span class="icon" aria-hidden="true">' + (c.icon || '✨') + '</span>'
-          + '<span><h4>' + esc(c.name) + '</h4><span class="meta">' + chips + '<span class="reward"><i class="egg sm"></i>+' + c.eggs + '</span></span></span>' + right + '</div>';
-      }).join('');
+      // the list: what is left first, then what waits, then what is approved (Open Design's order)
+      var rank = function (c) { var m = C.markOf(w, k.id, c.id, t); return !m ? 0 : m.status === 'pending' ? 1 : 2; };
+      q(doc, 'kid-chores').innerHTML = due.slice().sort(function (a, b) { return rank(a) - rank(b); }).map(function (c) { return choreCard(w, k, c, t, adult, 'kid'); }).join('');
       if (!due.length) WB.ui.stateScreen(q(doc, 'kid-chores'), { kind: 'empty', compact: true, title: 'Hoy no hay tareas', text: 'Un día libre no cuenta ni rompe tu racha.' });
+      var left = due.filter(function (c) { return !C.markOf(w, k.id, c.id, t); });
+      q(doc, 'kid-sheet-list').innerHTML = left.length ? left.map(function (c) { return choreCard(w, k, c, t, adult, 'sheet'); }).join('')
+        : '<div class="empty-k"><img class="px" src="../img/pixel/nido-heno.png" width="90" height="33" alt=""><b>¡Todo listo por hoy!</b><span>No te quedan tareas por marcar.</span></div>';
       [].forEach.call(doc.querySelectorAll('[data-mark]'), function (b) {
         b.onclick = function () {
-          var c = choreOf(b.getAttribute('data-mark'));
+          var c = choreOf(b.getAttribute('data-mark')), inSheet = !!b.closest('[data-od-id="kid-sheet"]');
           mark(k.id, c.id);
           toast(doc, 'kid-toast', adult || c.autoApprove ? '¡Aprobada! +' + c.eggs + ' huevos' : '¡Bien! Ahora la ve un adulto.');
+          var hen = q(doc, 'kid-hen'); if (!still) { hen.classList.remove('hop'); void hen.offsetWidth; hen.classList.add('hop'); }
+          if (inSheet) (sheet.querySelector('[data-mark]') || q(doc, 'kid-sheet-close')).focus();
         };
       });
-      var allDone = due.length && due.every(function (c) { return C.markOf(w, k.id, c.id, t); });
+      var waiting = due.some(function (c) { var m = C.markOf(w, k.id, c.id, t); return m && m.status === 'pending'; });
       WB.setScreenState(!due.length ? 'rest' : miss ? 'missed' : allDone ? 'all-done' : waiting ? 'waiting' : 'default');
+    });
+    if (WB.params.hice && !adult) openSheet(true);
+  });
+
+  /* ==========================================================================
+     app.hen — «Mi gallina»: her stage, what is next (gallina R2, R3); provisional (DECISIONS F11)
+     ========================================================================== */
+  WB.wire('app.hen', function (WB, doc) {
+    preview('app.hen');
+    var k = kidOnly(doc, 'hen'); if (!k) return;
+    kidBar(doc, 'app.hen', k, true);
+    render(doc, function () {
+      var w = W(), st = C.stage(w, k.id), stages = C.settings(w).stages, i = ['pollito', 'pollita', 'gallina', 'dorada'].indexOf(st.stage);
+      drawHen(q(doc, 'hen-hen'), w, k, false, false);
+      q(doc, 'hen-name').textContent = HEN[st.stage].name.replace(/^./, function (c) { return c.toUpperCase(); });
+      q(doc, 'hen-step').textContent = 'Etapa ' + (i + 1) + ' de 4';
+      q(doc, 'hen-fill').style.setProperty('--p', st.next ? Math.round(st.approved / st.next * 100) + '%' : '100%');   // the bar reads like its words
+      q(doc, 'hen-next').textContent = st.next ? st.approved + ' de ' + st.next + ' tareas aprobadas para ser ' + HEN[['pollito', 'pollita', 'gallina', 'dorada'][i + 1]].name : '¡Ya es gallina dorada!';
+      q(doc, 'hen-stages').innerHTML = ['pollito', 'pollita', 'gallina', 'dorada'].map(function (name, j) {
+        var cls = j < i ? '' : j === i ? ' is-now' : ' is-next', sub = j < i ? 'Listo' : j === i ? 'Ahora' : stages[j - 1] + ' tareas';
+        return '<div class="stage-k' + cls + '" data-od-id="hen-stage-' + name + '"><img class="px" src="' + henArt(doc, name, 'happy') + '" width="48" height="48" alt=""><span>' + (name === 'dorada' ? 'Dorada' : HEN[name].name.replace(/^./, function (c) { return c.toUpperCase(); })) + '</span><small>' + sub + '</small></div>';
+      }).join('');
+      WB.setScreenState('default');
     });
   });
 
   /* ==========================================================================
-     app.prizes — a kid's prizes (huevos R5–R9)
+     app.streak — «Racha»: the streak, the wildcards, a pause (rachas R5, R10, R12); provisional (DECISIONS F11)
+     ========================================================================== */
+  WB.wire('app.streak', function (WB, doc) {
+    preview('app.streak');
+    var k = kidOnly(doc, 'streak'); if (!k) return;
+    kidBar(doc, 'app.streak', k, true);
+    render(doc, function () {
+      var w = W(), t = today(), s = C.streak(w, k.id, t);
+      drawHen(q(doc, 'streak-hen'), w, k, false, false);
+      q(doc, 'kid-streak').innerHTML = streakHtml(k, s, false);
+      WB.setScreenState('default');
+    });
+  });
+
+  /* ==========================================================================
+     app.prizes — the kid's prizes, and the adult's deliveries
      ========================================================================== */
   WB.wire('app.prizes', function (WB, doc) {
     preview('app.prizes');
     var k = kidOf(), adult = isAdult();
     if (!k && adult) { var first = kids()[0]; if (first) { WB.setScreenContext({ kid: first.id }); k = first; } }
     if (!k || (!adult && k.id !== me().id)) { WB.ui.stateScreen(q(doc, 'prizes'), { kind: 'no-access', title: 'Estos no son tus premios', text: 'Cada quien ve solo los suyos.', primary: { label: 'Ir a mis premios', go: 'app.prizes' } }); WB.setScreenState('no-access'); return; }
-    tabs(doc, 'app.prizes');
-    q(doc, 'tabs').hidden = adult;
+    kidBar(doc, 'app.prizes', k, !adult);
     q(doc, 'prizes-back').hidden = !adult; q(doc, 'prizes-back').onclick = function () { WB.back('app.today'); };
     render(doc, function () {
       var w = W(), t = today(), bal = C.eggs(w, k.id, t).balance;

@@ -3,7 +3,7 @@ id: shell-header
 actor: a person trying the simulator (not a family member)
 trigger: the simulator opens; the bar stays on top of every screen
 status: draft
-last checked against the simulator: 03f6c59
+last checked against the simulator: 2ad80d2
 ---
 
 # The simulator's shell — the doors, the bar and the console
@@ -20,8 +20,9 @@ the rest is done from the browser console with `WB` and `WBShell` (README «From
    signs out, plays the splash; the family's data stays). «See the screens» opens the gallery. An old link
    `/simulator/#<screen>` opens the app there.
    The app's first visit opens the splash; the hen in the bar goes back to the doors (tests/doors.spec.mjs).
-   **The gallery** (`gallery.html`, `shell/gallery.js`): every state of every app screen as a small live phone, grouped
-   by flow (the flow docs' `order:`, then the catalog's order), each with the screen's and the state's names. A
+   **The gallery** (`gallery.html`, `shell/gallery.js`): every state of every app screen as a small live phone, in three
+   sections by who sees it — «Before signing in», «Parent», «Kid» (the state's `for` in the catalog, else the role of the
+   person it is seen through) — and inside each, grouped by flow (the flow docs' `order:`, then the catalog's order), each with the screen's and the state's names. A
    thumbnail is a still (sim.js `?still=1&as=`): the standard family seen as the state's person (`as` in the catalog,
    else the kid when it has a phone, else Mamá); it never moves on and never saves. A click opens that screen and state
    in the app, with the visitor's own data (tests/gallery.spec.mjs).

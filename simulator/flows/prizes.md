@@ -4,12 +4,13 @@ actor: kid redeems, adult delivers
 trigger: a kid has enough eggs for a prize
 status: draft
 order: 3
-last checked against the simulator: 03f6c59
+last checked against the simulator: 2ad80d2
 ---
 
 # Prizes — redeem and deliver
 
-Screens: `app.prizes`, reached from the kid's tabs on their phone, or from `app.kid` («Ver sus premios») as an adult.
+Screens: `app.prizes`, reached from «Premios» in the kid's floating bar on their phone (DECISIONS F11; its nest opens
+«¿Qué hiciste?» on Inicio), or from `app.kid` («Ver sus premios») as an adult.
 
 ## Steps
 
